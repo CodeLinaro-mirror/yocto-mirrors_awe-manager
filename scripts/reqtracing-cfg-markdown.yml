@@ -1,0 +1,23 @@
+dir_or_file:
+  - awe_manager/tests/src
+  - awe_manager/components/awe_cmd/tests
+  - awe_manager/components/awe_awc/tests
+  - awe_manager/components/awe_ctrl/tests
+  - awe_manager/components/awe_config/tests
+  - awe_manager/components/awe_osal/tests
+
+  - awe_manager/docs
+  - awe_manager/components/awe_cmd/docs
+  - awe_manager/components/awe_awc/docs
+  - awe_manager/components/awe_ctrl/docs
+  - awe_manager/components/awe_config/docs
+  - awe_manager/components/awe_osal/docs
+
+formats: [markdown]
+importers: [yml, source]
+exporters: [text]
+outfiles: [awe_manager/docs/traceability_report.md]
+
+verbose: 2
+
+format: tree

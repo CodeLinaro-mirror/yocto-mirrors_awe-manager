@@ -1,0 +1,22 @@
+@startuml 2_structural
+
+skinparam BoxPadding 15
+skinparam componentStyle rectangle
+
+package "AWE-Manager" as awe_mgr  #AAAFAA {
+
+    [awe_CONFIG] as cfg_s
+    [awe_AWC] as awc_s
+    [awe_CMD] as cmd_s
+    [awe_CTRL] as ctrl_s 
+
+
+}
+database "AWC"
+awc_s <-- AWC 
+
+interface "SHMEM/\nsocket" as shmem
+ctrl_s <--> shmem
+
+
+@enduml

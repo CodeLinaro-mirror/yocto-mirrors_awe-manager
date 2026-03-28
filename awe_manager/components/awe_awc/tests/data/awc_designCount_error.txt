@@ -1,0 +1,13 @@
+
+_INFO_,schema_version,3
+
+_INFO_,version,1.2.3-version
+
+_INFO_,description,AWB File with design count mismatch
+
+_INFO_,ctl_delimiter,.
+
+_INFO_,nr_awb,2
+
+# _AWB_,endPointId, Name/Label, FileName, Size, MD5sum
+_AWB_,0,Main,test_subcanvas_simple.awb,18068md,c64819ca9a6c28ece8eeaf5e9855c70f

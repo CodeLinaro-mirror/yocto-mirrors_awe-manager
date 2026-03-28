@@ -1,0 +1,1 @@
+see awe_manager/docs/changelog.md

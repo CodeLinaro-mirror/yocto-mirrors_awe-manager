@@ -1,0 +1,44 @@
+# easier for debugging
+cfg -key mgr.ctrl.socket.timeoutms -value -1
+cfg -key mgr.awc.log.level -value "debug"
+
+mgr_init
+
+#
+# load AWC of toplevel and of 2 subcanvases
+#
+load_awc -awc ./data/designs/subcanvas/target_files/awc_index.txt -endpoint 0
+load_awc -awc ./data/designs/subcanvas/target_files/awc_index-multiplier0.txt -endpoint 1  # instID (byte) = 16 * endpoint + coreID
+load_awc -awc ./data/designs/subcanvas/target_files/awc_index-multiplier1.txt -endpoint 2
+
+# switch to toplevel and load signal flow
+awc -endpoint 0
+
+load_design -name Main
+
+# check on its output, all(8x) 0 values
+sleep 200
+get_value -var Sink1.value
+
+#
+# fill 2 subcanvases
+#
+load_design -name Multiplier0
+load_design -name Multiplier1
+
+# output of signal flow should show first 4 values != 0 (1000, 666, 1000, 666) or:  0x000007d0, 0x0000029a, 0x000007d0, 0x0000029a
+# need to wait here
+sleep 500
+get_value -var Sink1.value
+
+# directly modify Subcanvas variables
+
+set_value -var Subcanvas_Inst0/DC.value -values "0xaffe"
+set_value -var Subcanvas_Inst1/DC.value -values "0x44443333"
+
+set_value -var Subcanvas_Inst0/ShiftBits1.numBits -values "3"
+set_value -var Subcanvas_Inst1/ShiftBits1.numBits -values "-2"
+
+# output of signal flow should show now 4 different values : 0x00000320, 0x0000affe, 0x00000019, 0x44443333
+sleep 100
+get_value -var Sink1.value
