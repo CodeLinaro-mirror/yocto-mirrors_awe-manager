@@ -1,0 +1,9 @@
+@startuml 2_structural
+
+[*] --> initialized: awectrl_init()
+
+initialized -[#DD00AA]-> initialized: awectrl_transact()
+
+initialized --> [*]: awectrl_exit()
+
+@enduml

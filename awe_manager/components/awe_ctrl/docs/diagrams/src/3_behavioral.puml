@@ -1,0 +1,24 @@
+@startuml 3_behavioral
+
+participant "awe_CTRL\ntransact()" as ctrl
+participant "Backend" as b
+participant "AWE HostTask\n(DSP)" as AWE
+
+ctrl -> b: "write"( <request data> )
+b -> AWE: "notify"() e.g. irq
+
+AWE -> b: "read"( <request data> )
+
+... ...
+
+ctrl -> b: "read"( <response_data> )
+
+note over ctrl: waits!
+& note over AWE: Response\nReady
+
+AWE -> b: "write"( <response_data> )
+b -> ctrl: "notify"()
+
+note over ctrl: Happy
+
+@enduml

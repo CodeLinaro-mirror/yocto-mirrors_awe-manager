@@ -1,0 +1,26 @@
+mgr_init -l 3
+load_awc -awc ./data/designs/dtmf_gen/target_files/awc_index.txt -awb Main
+load_design -name Main
+sleep 2
+info
+sleep 1
+cd dtmf
+toggle_mute
+sleep 1
+toggle_mute
+sleep 1
+vol -gain -30
+
+freq -col 1209 -row 697
+sleep 1
+
+freq -col 1336 -row 697
+sleep 1
+
+freq -col 1477 -row 697
+sleep 1
+
+freq -col 1209 -row 770 
+sleep 2
+
+quit

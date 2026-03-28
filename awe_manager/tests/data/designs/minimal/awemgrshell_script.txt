@@ -1,0 +1,25 @@
+mgr_init -l 3
+load_awc -awc /home/vspri/projects/qc/qc-audiolite-integration-awemanager/awe_manager/tests/data/designs/minimal/target_files/awc_index.txt -awb Main
+load_design -name Main
+
+sleep 5
+info
+
+get_value -var Scaler1.gain
+sleep 2
+
+set_value -var Scaler1.gain -values "-24" -float
+sleep 2
+get_value -var Scaler1.gain
+
+set_value -var Scaler1.gain -values "-14" -float
+sleep 2
+get_value -var Scaler1.gain
+
+set_value -var Scaler1.gain -values "-4" -float
+sleep 2
+get_value -var Scaler1.gain
+
+set_value -var Scaler1.gain -values "-24" -float
+sleep 2
+get_value -var Scaler1.gain

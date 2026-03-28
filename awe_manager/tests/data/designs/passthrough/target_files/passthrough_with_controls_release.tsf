@@ -1,0 +1,12 @@
+0,add_symbol_id,wire1,Wire,1
+0,add_symbol_id,wire2,Wire,2
+0,add_symbol_id,wire3,Wire,3
+0,add_symbol_id,wire4,Wire,4
+0,add_symbol_id,SYS_toFloat,ModuleTypeConversion,5
+0,add_symbol_id,Meter1,ModuleMeter,9
+0,add_symbol_id,SYS_toFract,ModuleTypeConversion,10
+0,add_symbol_id,FullMute,ModuleMuteSmoothed,30000
+0,add_symbol_id,SOF1,ModuleSecondOrderFilterSmoothed,30003
+0,add_symbol_id,RMSCheck,ModuleRMSFract32,30005
+0,add_symbol_id,SubSys1____ScalerN1,ModuleScalerNV2,30033
+0,add_symbol_id,theLayout_1A0,Layout,1

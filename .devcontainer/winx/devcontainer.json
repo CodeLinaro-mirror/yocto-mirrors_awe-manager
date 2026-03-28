@@ -1,0 +1,32 @@
+//devcontainer.json
+{
+  "name": "Linux-WinX",
+
+  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  "image": "devops-docker.artifactory.ops.dspconcepts.com/winx:latest",
+
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  // "features": {},
+
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE},target=/root,type=bind,consistency=cached",
+    "source=${localEnv:APPDATA}/uv,target=/root/.config/uv,type=bind,consistency=cached"
+  ],
+
+  "remoteEnv": {
+    "UV_CONFIG_FILE": "/root/.config/uv/uv.toml",
+    "PIP_CONFIG_FILE": "/root/pip/pip.ini",
+    "HATCH_INDEX_REPO": "https://artifactory.ops.dspconcepts.com/artifactory/api/pypi/awepy-dspc-pypi-local"
+  },
+
+  "customizations": {
+    "vscode": {
+      "settings": {},
+      "extensions": ["streetsidesoftware.code-spell-checker"]
+    }
+  },
+
+  // "postCreateCommand": "cd ~ && mkdir -p .pip && cp pip/pip.ini .pip/pip.conf "
+
+  // "remoteUser": 1000  // "root"
+}
