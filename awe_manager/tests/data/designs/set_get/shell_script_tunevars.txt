@@ -1,0 +1,7 @@
+mgr_init -l 0x22223
+load_awc -awc ../awe_manager/tests/data/designs/set_get/target_files/awc_index.txt
+load_design -name Main
+
+sleep 1
+info
+enum_controls

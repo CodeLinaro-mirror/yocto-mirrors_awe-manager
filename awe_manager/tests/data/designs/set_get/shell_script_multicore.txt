@@ -1,0 +1,38 @@
+mgr_init -l 0x22223
+
+load_awc -awc ../awe_manager/tests/data/designs/set_get/target_files/awc_index.txt
+load_awc -awc ../awe_manager/tests/data/designs/set_get/target_files/awc_index.txt
+load_awc -awc ../awe_manager/tests/data/designs/set_get/target_files/awc_index.txt
+load_awc -awc ../awe_manager/tests/data/designs/set_get/target_files/awc_index.txt
+
+# load_design -name Main
+
+awc -endpoint 0
+info
+load_design -name Main
+
+awc -endpoint 1
+info
+load_design -name Main
+
+awc -endpoint 2
+info
+load_design -name Main
+
+awc -endpoint 3
+info
+load_design -name Main
+
+sleep 1
+# comm-trace -on
+
+awc -endpoint 0
+get_value -var SinkInt_10.value
+awc -endpoint 1
+get_value -var SinkInt_10.value
+awc -endpoint 2
+get_value -var SinkInt_10.value
+awc -endpoint 3
+get_value -var SinkInt_10.value
+
+# comm-trace -off

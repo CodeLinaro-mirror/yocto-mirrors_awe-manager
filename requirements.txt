@@ -1,0 +1,20 @@
+pytest
+
+mkdocs-monorepo-plugin
+mkdocs-build-plantuml-plugin
+mkdocs-material
+markdown-exec
+mkdocs-autorefs
+mkdocs-macros-plugin
+mkdocs_puml
+mkdocs-with-pdf
+qrcode 
+mkdocs-markdownextradata-plugin # needed ?
+mkdoxy>=1.2.6
+
+lizard 
+jinja2
+
+GitPython
+
+req-tracer

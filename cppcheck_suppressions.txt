@@ -1,0 +1,18 @@
+# Suppression list for cppcheck.
+# Syntax is `{error id}:{path prefix}`.
+# You can use * to match arbitrary characters.
+
+# Examples and tests are excluded from the MISRA report.
+*:*awe_manager/examples/*
+*:*awe_manager/tests/*
+*:*awe_manager/components/awe_awc/examples/*
+*:*awe_manager/components/awe_awc/tests/*
+*:*awe_manager/components/awe_cmd/tests/*
+*:*awe_manager/components/awe_config/tests/*
+*:*awe_manager/components/awe_ctrl/tests/*
+*:*awe_manager/components/awe_osal/example/*
+*:*awe_manager/components/awe_osal/tests/*
+
+# Exclude errors originating from system-level sources.
+missingIncludeSystem
+*:/usr/*

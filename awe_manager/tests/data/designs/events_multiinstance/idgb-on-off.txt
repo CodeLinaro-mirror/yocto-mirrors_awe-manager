@@ -1,0 +1,30 @@
+mgr_init -l 0x22223
+load_awc -awc ../awe_manager/tests/data/designs/events_multiinstance/target_files/awc_index.txt
+
+# comm-trace -on
+load_design -name Main
+
+sleep 100  # sleep for 100ms
+
+info
+
+event -get
+
+sleep 100
+set_value -var EventTrigger.value -values 1
+sleep 100
+event -get
+set_value -var EventTrigger.value -values 0
+
+event -get
+
+event -report_off
+sleep 100
+
+event -get
+
+set_value -var EventTrigger.value -values 1
+sleep 100
+set_value -var EventTrigger.value -values 0
+
+event -get

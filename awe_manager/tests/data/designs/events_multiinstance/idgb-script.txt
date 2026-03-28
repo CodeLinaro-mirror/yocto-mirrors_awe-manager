@@ -1,0 +1,65 @@
+mgr_init -l 0x22223
+load_awc -awc ../awe_manager/tests/data/designs/events_multiinstance/target_files/awc_index.txt
+
+# comm-trace -on
+load_design -name Main
+
+sleep 100  # sleep for 100ms
+
+info
+enum_controls
+cd controls
+ls
+cd ..
+event -list
+event -get
+
+sleep 100
+set_value -var EventTrigger.value -values 1
+sleep 100
+event -get
+set_value -var EventTrigger.value -values 0
+
+get_value -var Event1.triggerCnt
+
+sleep 100
+set_value -var EventTrigger.value -values 1
+sleep 100
+event -get
+set_value -var EventTrigger.value -values 0
+
+get_value -var Event1.triggerCnt  # should read 2
+
+event -disable Event1
+
+sleep 100
+set_value -var EventTrigger.value -values 1
+sleep 100
+event -get
+set_value -var EventTrigger.value -values 0
+
+get_value -var Event1.triggerCnt  # should STILL read 2
+
+event --enable Event1
+
+sleep 100
+set_value -var EventTrigger.value -values 1
+sleep 100
+event -get
+set_value -var EventTrigger.value -values 0
+
+get_value -var Event1.triggerCnt  # should read 3 now
+
+event -report_on
+
+sleep 100
+set_value -var EventTrigger.value -values 1
+sleep 100
+set_value -var EventTrigger.value -values 0
+
+sleep 100
+set_value -var EventTrigger.value -values 1
+sleep 100
+set_value -var EventTrigger.value -values 0
+
+event -report_off
