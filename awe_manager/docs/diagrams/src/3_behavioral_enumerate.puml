@@ -1,0 +1,28 @@
+@startuml 3_behavioral_enumerate
+skinparam BoxPadding 15
+
+box "AWE Service" #AAAFAA
+participant "AWE Controller" as ctrl
+participant "AWE-Manager" as awemgr #8888FF
+end box
+database "AWC\nDB" as awc
+
+box "Audio Processors"
+participant "Audio Processors" as DSP #8888FF
+participant "AWECore\nLib" as core #4444FF
+end box
+
+ctrl -> awemgr: awemgr_get_awc_context(mgr_p, endpoint)
+note over awemgr: Gets AWC context\nfor endpoint
+awemgr --> ctrl: awectx_p
+
+ctrl -> awemgr: awemgr_get_controls_count(awectx_p)
+awemgr --> ctrl: nr_of_controls
+
+loop idx < nr_of_controls
+ctrl -> awemgr: awemgr_get_control_info(awectx_p, idx, &info)
+awemgr --> ctrl: 
+note over ctrl: do s.th.\nwith info
+end
+
+@enduml

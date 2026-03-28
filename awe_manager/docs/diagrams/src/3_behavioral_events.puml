@@ -1,0 +1,47 @@
+@startuml 3_behavioral_events
+skinparam BoxPadding 15
+
+box "AWE Service" #AAAFAA
+participant "AWE Controller" as ctrl
+participant "AWE-Manager" as awemgr #8888FF
+end box
+database "AWC\nDB" as awc
+
+box "Audio Processors"
+participant "Audio Processors" as DSP #8888FF
+participant "AWECore\nLib" as core #4444FF
+end box
+
+... initialization happened and AWC is loaded (ctx_p available) ...
+
+note over ctrl: implement\ncb_fct()
+ctrl -> awemgr: awemgr_events_start(ctx_p, &cb_fct, usrData)
+awemgr --> ctrl:
+
+opt Add category specific listener
+note over ctrl: implement\ncb_fct_CAT()
+ctrl -> awemgr: awemgr_events_add_category_listener(ctx_p, CAT, &cb_fct_CAT, userData_CAT)
+awemgr --> ctrl: 
+end
+
+
+group Typically In Thread
+ctrl -> awemgr: awemgr_process_next_event(ctx_p, timeout)
+note over awemgr: Waits for events\nto happen
+
+core -> DSP: cbAweEventTrigger_t()
+DSP -[#blue]> awemgr: event transmit
+
+
+awemgr -> ctrl: appropriate callback invoked
+note over ctrl: process event\nin callback fct
+ctrl --> awemgr:
+awemgr -[#blue]> DSP: ack
+
+awemgr --> ctrl: event happened, or timeout
+end
+
+ctrl -> awemgr: awemgr_events_stop(ctx_p)
+awemgr --> ctrl:
+
+@enduml

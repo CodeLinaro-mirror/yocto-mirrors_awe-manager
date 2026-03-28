@@ -1,0 +1,25 @@
+
+mgr_init -l 0x22223
+load_awc -awc ./target_files/awc_index.txt
+load_design -name Main
+enum_controls
+
+info
+sleep 100
+
+
+# orig values
+comm-trace -file target_files/original_values.awb -on
+cd controls
+SourceInt_10.value -values "0x0000000a 0x000000aa, 0x0000dead, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x0000000a, 0x000000aa, 0x0000dead"
+SourceInt_1.value -values "0xdead"
+cd ..
+comm-trace -off
+
+# modified values
+comm-trace -file target_files/modified_values.awb -on
+cd controls
+SourceInt_10.value -values "0xa00aa00a 0xaa0000aa, 0xdeaddead, 0xF0000000, 0xF0000000, 0xF0000000, 0xF0000000, 0xa00aa00a, 0xaa0000aa, 0xdeaddead"
+SourceInt_1.value -values "0xaffedead"
+cd ..
+comm-trace -off

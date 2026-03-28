@@ -1,0 +1,14 @@
+codecov:
+  bot: buildbot-dspc
+fixes:
+  - "::awe_manager/"
+ignore:
+  - "awe_manager/examples/"
+coverage:
+  status:
+    project:
+      default:
+        informational: true
+    patch:
+      default:
+        informational: true

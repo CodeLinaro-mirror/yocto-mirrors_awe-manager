@@ -1,0 +1,157 @@
+# *****************************************************************************
+# Source and Output Directory, General Settings
+# *****************************************************************************
+docs_dir: awe_manager/docs
+
+site_name: AWE-Manager Design Documentation
+site_description: Design Documentation for AWE-Manager and its components
+site_author: V.Springer, A.Garg
+site_dir: dist/www
+
+copyright: (C) DSP Concepts
+repo_url: https://bitbucket.org/dspconcepts/qc-audiolite-integration-awemanager
+
+# *****************************************************************************
+# Navigation Pages
+# *****************************************************************************
+nav:
+  - Overview: "0_overview.md"
+  - Context: "1_context_view.md"
+  - Structure: "2_structural_view.md"
+  - Behavior: "3_behavioral_view.md"
+  - Resources: "4_resource_view.md"
+  - Requirements: "99_requirements.md"
+  - Testing: "testcases.md"
+
+  - Components: '*include ./awe_manager/components/*/mkdocs.yml'
+
+  - Traceability:
+    - Introduction: "traceability_intro.md"
+    - Report: traceability_report.md
+
+  - Terminology: terminology.md
+  - Changelog: changelog.md
+  - API:
+    - code.md
+    - "awe_manager.h": AweMgrHdrDocs/awe__manager_8h.md
+
+not_in_nav: |
+    AweMgrHdrDocs/*.md
+
+# *****************************************************************************
+# Plugin configuration
+# *****************************************************************************
+plugins:
+  - search
+  - markdownextradata
+  - autorefs  # auto links pages; mkdocs-autorefs; https://pypi.org/project/mkdocs-autorefs/
+  - monorepo
+  - macros
+  - with-pdf:
+      debug_html: false
+      verbose: false
+      custom_template_path: doc_data/templates
+      cover: true
+      cover_title: "Design Documentation"
+      cover_subtitle: "AWE-Manager"
+      cover_logo: images/dspc_cover_image.png
+      back_cover: true
+      toc_level: 3
+
+      output_path: awe-manager-doc-{}.pdf
+
+      enabled_if_env: ENABLE_PDF_EXPORT
+
+# WORKS NICELY FOR MKDOCS SERVE, but not for PDF export :(
+#  - plantuml:
+#      # puml_url: https://www.plantuml.com/plantuml/
+#      puml_url: http://127.0.0.1:8080
+#      num_workers: 8
+
+  - build_plantuml:
+      render: 'server' # 'server' or "local" for local rendering
+      bin_path: '/usr/bin/plantuml' # ignored when render: server
+      server: 'http://www.plantuml.com/plantuml' # official plantuml server
+      disable_ssl_certificate_validation: true # for self-signed and invalid certs
+      output_format: 'svg' # or "png"
+      allow_multiple_roots: true # in case your codebase contains more locations for diagrams (all ending in diagram_root)
+      diagram_root: 'docs/diagrams' # should reside under docs_dir
+      output_folder: 'out'
+      input_folder: 'src'
+      input_extensions: '' # comma separated list of extensions to parse, by default every file is parsed
+
+  - mkdoxy:
+      projects:
+        AweMgrHdrDocs: # name of project must be alphanumeric + numbers (without spaces)
+          src-dirs: awe_manager/include # path to source code (support multiple paths separated by space) => INPUT
+          full-doc: True # if you want to generate full documentation
+          doxy-cfg: # standard doxygen configuration (key: value)
+            FILE_PATTERNS: "*.h*" # specify file patterns to filter out
+            RECURSIVE: False # recursive search in source directories
+            MARKDOWN_SUPPORT: True
+            # not yet working: later! HTML_EXTRA_STYLESHEET: my_customdoxygen.css
+
+# *****************************************************************************
+# Theme configuration
+# *****************************************************************************
+theme:
+  name: "material"
+  logo: images/dspconcepts_logo.png
+  favicon: images/dspconcepts_logo.png
+  custom_dir: doc_data
+  highlightjs: true
+  hljs_languages:
+    - yaml
+#  features:
+#    - navigation.tabs
+#    - navigation.tabs.sticky
+#    - navigation.indexes
+#    - navigation.top
+#    - navigation.path
+#    - navigation.instant
+#    - navigation.tracking
+
+# *****************************************************************************
+# Extensions to markdown format
+# *****************************************************************************
+markdown_extensions:
+  # https://python-markdown.github.io/extensions/smarty/; s.th. like &hellip;
+  - smarty
+  # code highlighting and eyecandies
+  - codehilite:
+      linenums: true
+  # smileys et al, notes/warnings ...
+  - admonition
+  - attr_list
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.magiclink
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+# *****************************************************************************
+# Script hooks during documentation generation
+#   - used e.g. to inject a "decent" GIT repo tag
+# *****************************************************************************
+hooks:
+  - doc_data/hooks.py
+
+# *****************************************************************************
+# Extra variables that can be consumed anywhere in markdown content
+# *****************************************************************************
+extra:
+  some_variable: has a value
+  name:
+    awe_host: '[_Audio Processors_](/terminology#audio-proc)'
+    awe_mgr: "**AWE-Manager**"
+    awe_sf: '[_AWE Signal Flow_](/terminology#signalflow)'
+    awe_lib: '[_AWE Core Library_](/terminology#awecore)'
+    awe_tune_cmd: 'AWE Tuning Command'
+    awe_awc_db: _AWE Container_
+    controller: '[_AWE-Controller_](/terminology#awe-controller)'
+    awctool: '[_AWC-Tooling_](/terminology#awctool)'
+    awetc: '[_AWC-TC_](/terminology#awetc)'

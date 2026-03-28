@@ -1,0 +1,13 @@
+@startuml 1_context
+
+package "AWE-Manager" as awe_mgr  #AAAFAA {
+
+    [awe_CMD] as cmd_s #8888FF
+    [awe_CTRL] as ctrl_s 
+    database "TuneCmd"
+
+    cmd_s -> TuneCmd : generates 
+    TuneCmd -> ctrl_s: fetches & transmits 
+}
+
+@enduml

@@ -1,0 +1,3 @@
+# Ensure that every Jenkinsfile change gets an expert for review ;-)
+
+*Jenkinsfile @dspconcepts/jenkins-reviewers:least_busy(1)
