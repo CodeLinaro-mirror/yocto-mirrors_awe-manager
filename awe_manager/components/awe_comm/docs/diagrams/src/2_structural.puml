@@ -1,0 +1,16 @@
+@startuml 2_structural
+
+[*] --> Initialized: awecomm_init()
+Initialized: ready for transmissions
+
+Initialized --> Locked: awecomm_get_cmdbuf()
+Locked: Buffer can be filled with command data,
+Locked: Data can be sent/received
+
+Locked -[#DD00AA]-> Locked: awecomm_transact()
+
+Locked --> Initialized: awecomm_release_cmdbuf()
+
+Initialized --> [*]: awecomm_exit()
+
+@enduml

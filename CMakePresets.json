@@ -1,0 +1,191 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 22,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "common",
+            "hidden": true,
+            "binaryDir": "${sourceDir}/build/${hostSystemName}/${presetName}",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": {
+                    "type": "BOOL",
+                    "value": "ON"
+                }
+            }
+        },
+        {
+            "name": "distribution",
+			"description": "Builds exe and lib for release under Linux systems",
+            "inherits": "common",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": {
+                    "type": "STRING",
+                    "value": "Release"
+                },
+                "AWEMGR_BUILD_TESTS": {
+                    "type": "BOOL",
+                    "value": "OFF"
+                },
+                "AWEMGR_STATIC_ANALYSIS": {
+                    "type": "BOOL",
+                    "value": "ON"
+                },
+                "AWEMGR_ENABLE_ALL_WARNINGS": {
+                    "type": "BOOL",
+                    "value": "ON"
+                }
+            }
+        },
+        {
+            "name": "testing",
+            "inherits": "common",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": {
+                    "type": "STRING",
+                    "value": "Debug"
+                },
+                "AWEMGR_TESTS_COVERAGE": {
+                    "type": "BOOL",
+                    "value": "ON"
+                }
+            }
+        },
+        {
+            "name": "debug",
+            "inherits": "common",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": {
+                    "type": "STRING",
+                    "value": "Debug"
+                },
+                "AWEMGR_STATIC_ANALYSIS": {
+                    "type": "BOOL",
+                    "value": "OFF"
+                }
+            }
+        },
+        {
+            "name": "windows-distribution",
+            "inherits": "common",
+			"description": "Release build for Windows with Visual Studio",
+			"condition": {
+			    "type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Windows"
+			},
+			"generator": "Visual Studio 17 2022",
+			"architecture": "x64",
+            "cacheVariables": {
+				"CMAKE_CONFIGURATION_TYPES": "Debug;Release",
+                "AWEMGR_BUILD_TESTS": {
+                    "type": "BOOL",
+                    "value": "OFF"
+                },
+                "AWEMGR_STATIC_ANALYSIS": {
+                    "type": "BOOL",
+                    "value": "OFF"
+                }
+            }
+        },
+        {
+            "name": "windows-testing",
+            "inherits": "common",
+		"description": "Debug build for Windows with Visual Studio (includes tests + gtest)",
+		"condition": {
+		    "type": "equals",
+			"lhs": "${hostSystemName}",
+			"rhs": "Windows"
+		},
+		"generator": "Visual Studio 17 2022",
+		"architecture": "x64",
+            "cacheVariables": {
+			"CMAKE_CONFIGURATION_TYPES": "Debug;Release",
+                "AWEMGR_BUILD_TESTS": {
+                    "type": "BOOL",
+                    "value": "ON"
+                },
+                "AWEMGR_STATIC_ANALYSIS": {
+                    "type": "BOOL",
+                    "value": "OFF"
+                }
+            }
+        },
+        {
+            "name": "aarm64-cross",
+            "inherits": "common",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/generic-aarch64-linux.cmake",
+                "AWEMGR_STATIC_ANALYSIS": {
+                    "type": "BOOL",
+                    "value": "OFF"
+                }
+            }
+        },
+        {
+            "name": "aweq-build",
+            "inherits": "common",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "/opt/toolchains/snapdragon-auto-hgy-4-1-6-0_hlos_dev_cadence2-r00040-1-sa8255/toolchain.cmake",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "AWEMGR_BUILD_AWEQ": {
+                    "type": "BOOL",
+                    "value": "ON"
+                },
+                "AWEMGR_STATIC_ANALYSIS": {
+                    "type": "BOOL",
+                    "value": "OFF"
+                },
+                "AWEMGR_BUILD_TESTS": {
+                    "type": "BOOL",
+                    "value": "OFF"
+                },
+                "AWEMGR_AWECORE_CONNECTION": "CSHMEM"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "testing",
+            "configurePreset": "testing"
+        },
+        {
+            "name": "distribution",
+            "configurePreset": "distribution"
+        },
+        {
+            "name": "windows-distribution",
+            "configurePreset": "windows-distribution"
+        },
+        {
+            "name": "windows-testing",
+            "configurePreset": "windows-testing"
+        },
+        {
+            "name": "debug",
+            "configurePreset": "debug"
+        },
+        {
+            "name": "aarm64-cross",
+            "configurePreset": "aarm64-cross"
+        },
+        {
+            "name": "aweq-build",
+            "configurePreset": "aweq-build"
+        }
+    ],
+     "testPresets": [
+    {
+      "name": "testing",
+      "configurePreset": "testing"
+    },
+    {
+      "name": "windows-testing",
+      "configurePreset": "windows-testing"
+    }
+  ]
+}

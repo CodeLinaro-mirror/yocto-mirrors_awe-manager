@@ -1,0 +1,29 @@
+@startuml 3_behavioral_loaddesign
+skinparam BoxPadding 15
+
+box "AWE Service" #AAAFAA
+participant "AWE Controller" as ctrl
+participant "AWE-Manager" as awemgr #8888FF
+end box
+database "AWC\nDB" as awc
+
+box "Audio Processors"
+participant "Audio Processors" as DSP #8888FF
+participant "AWECore\nLib" as core #4444FF
+end box
+
+ctrl -> awemgr: awemgr_get_awc_context(mgr_p, endpoint)
+note over awemgr: Gets AWC context\nfor endpoint
+awemgr --> ctrl: awectx_p
+
+ctrl -> awemgr: awemgr_load_design(awectx_p, "Main")
+awemgr <-> awc: get AWB data for "Main"
+
+loop
+awemgr <-[#blue]> DSP: send AWB tuning cmd
+DSP <-> core: packetProcess()
+end
+
+awemgr --> ctrl:
+
+@enduml

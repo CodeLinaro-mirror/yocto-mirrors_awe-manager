@@ -1,0 +1,17 @@
+_INFO_,schema_version,3
+
+_INFO_,version,1.2.3-version
+
+_INFO_,description,AWB File with control count mismatch
+
+_INFO_,ctl_delimiter,|
+
+_INFO_,nr_mod,1
+_INFO_,nr_ctl,5
+
+_MOD_,GainControllerClass,2270400520,1234,4
+#_CTL_,name,handle,size,offset,def,min,max,step,type, 
+_CTL_,GainControllerClass|left_channel,2270400520,1,0,0,-50,5,0,int
+_CTL_,GainControllerClass|right_channel,2270400520,1,1,0,-60,10,5,int
+_CTL_,GainControllerClass|mute_all,2270400520,1,2,0,0,1,0,bool
+_CTL_,GainControllerClass|EnumControl,2270400520,1,3,0,0,2,0,enum

@@ -1,0 +1,19 @@
+@startuml 3_behavioral_event
+
+participant "awe_COMM\naweevent_read()" as ctrl
+participant "Backend" as b
+participant "AWE HostTask\n(DSP)" as AWE
+
+ctrl -> b: "read"( <read next> )
+note over ctrl: waits!
+
+... ...
+
+note over AWE: Event\nOccurred
+AWE -> b: "write"( <event data> )
+b -> ctrl: "notify"()
+
+
+note over ctrl: Happy\nwith\ndata
+
+@enduml

@@ -1,0 +1,1398 @@
+{
+  "containerType": "Toplevel",
+  "comments": [
+    "The first line.",
+    "The second line"
+  ],
+  "version": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "buildDateHex": "26030600",
+  "buildTimeHex": "12461600",
+  "versionModuleHandle": 0,
+  "buildConfiguration": "Release",
+  "maxMessageLength": 264,
+  "heapSize": [
+    [
+      5530,
+      1001,
+      1143,
+      68
+    ],
+    [
+      1001,
+      1001,
+      1001,
+      68
+    ],
+    [
+      1001,
+      1001,
+      1001,
+      68
+    ],
+    [
+      1001,
+      1001,
+      1001,
+      68
+    ]
+  ],
+  "clockDividers": [
+    "1A0"
+  ],
+  "inputDevices": [
+    {
+      "name": "SYS_in",
+      "numChannels": 1,
+      "blockSize": 48,
+      "sampleRate": 48000,
+      "dataType": "fract32",
+      "isComplex": 0,
+      "deviceName": "HWPin",
+      "channelNames": [
+        ""
+      ]
+    }
+  ],
+  "outputDevices": [
+    {
+      "name": "SYS_out",
+      "numChannels": 1,
+      "blockSize": 48,
+      "sampleRate": 48000,
+      "dataType": "fract32",
+      "isComplex": 0,
+      "deviceName": "HWPin",
+      "accumulatedDelay": [
+        0
+      ],
+      "channelNames": [
+        ""
+      ]
+    }
+  ],
+  "moduleClasses": [
+    {
+      "name": "DCSourceInt",
+      "id": 115
+    },
+    {
+      "name": "DCSourceV2",
+      "id": 114
+    },
+    {
+      "name": "Db20",
+      "id": 72
+    },
+    {
+      "name": "Event",
+      "id": 1446
+    },
+    {
+      "name": "Interleave",
+      "id": 98
+    },
+    {
+      "name": "LogicCompare",
+      "id": 38
+    },
+    {
+      "name": "RMS",
+      "id": 127
+    },
+    {
+      "name": "Rand",
+      "id": 123
+    },
+    {
+      "name": "ScalerV2",
+      "id": 19
+    },
+    {
+      "name": "SnapdragonSyncTDMPort",
+      "id": 18150
+    },
+    {
+      "name": "SourceV2Int",
+      "id": 247
+    },
+    {
+      "name": "TypeConversion",
+      "id": 102
+    },
+    {
+      "name": "WhiteNoise",
+      "id": 124
+    }
+  ],
+  "modules": [
+    {
+      "name": "Event1",
+      "description": "Event Module",
+      "status": "active",
+      "className": "Event",
+      "classID": 1446,
+      "objectID": 30003,
+      "clockDivider": "1A0",
+      "controllingModules": [],
+      "variables": [
+        {
+          "name": "Event1.eventType",
+          "value": 10,
+          "offset": 8,
+          "handle": 122892296,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 256,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "const",
+          "description": "Event type, defined by this module instance",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event1.triggerType",
+          "value": 0,
+          "offset": 8,
+          "handle": 122892297,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 512,
+          "range": [
+            0,
+            4,
+            0
+          ],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "parameter",
+          "description": "Trigger Type",
+          "units": "",
+          "isRangeEditable": 0,
+          "nameValueList": [
+            {
+              "value": 0,
+              "name": "RISING_EDGE"
+            },
+            {
+              "value": 1,
+              "name": "FALLING_EDGE"
+            },
+            {
+              "value": 2,
+              "name": "HIGH"
+            },
+            {
+              "value": 3,
+              "name": "LOW"
+            },
+            {
+              "value": 4,
+              "name": "NONE"
+            }
+          ],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event1.resetTriggerCnts",
+          "value": 0,
+          "offset": 8,
+          "handle": 122892298,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 1024,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "state",
+          "description": "Used to reset the triggerCnt and failedTriggerCnt.",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event1.triggerBehavior",
+          "value": 0,
+          "offset": 8,
+          "handle": 122892299,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 2048,
+          "range": [
+            0,
+            1,
+            0
+          ],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "parameter",
+          "description": "Controls whether the event is triggered immediately, or in deferred processing",
+          "units": "",
+          "isRangeEditable": 0,
+          "nameValueList": [
+            {
+              "value": 0,
+              "name": "Instant"
+            },
+            {
+              "value": 1,
+              "name": "Deferred"
+            }
+          ],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event1.prevTriggerValue",
+          "value": 0,
+          "offset": 8,
+          "handle": 122892300,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 4096,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "parameter",
+          "description": "Internal variable to store old trigger value",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event1.isCallbackRegistered",
+          "value": 0,
+          "offset": 8,
+          "handle": 122892301,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 8192,
+          "range": [
+            0,
+            1,
+            0
+          ],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "state",
+          "description": "Tracks whether there is an event callback registered on the target system",
+          "units": "",
+          "isRangeEditable": 0,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event1.triggerCnt",
+          "value": 0,
+          "offset": 8,
+          "handle": 122892302,
+          "dataType": "uint",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 16384,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "state",
+          "description": "Counts the number of times the module has successfully triggered the event callback",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event1.failedTriggerCnt",
+          "value": 0,
+          "offset": 8,
+          "handle": 122892303,
+          "dataType": "uint",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 32768,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "state",
+          "description": "Counts the number of times the event callback has failed to process the trigger",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event1.deferredProcessingActive",
+          "value": 0,
+          "offset": 8,
+          "handle": 122892304,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 65536,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "state",
+          "description": "State of deferred processing",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event1.deferredTriggerRequired",
+          "value": 0,
+          "offset": 8,
+          "handle": 122892305,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 131072,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "state",
+          "description": "Internal flag used to handle deferred processing",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event1.moduleObjId",
+          "value": 30003,
+          "offset": 8,
+          "handle": 122892306,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 262144,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "const",
+          "description": "Custom objectID of this module. -1 if not in custom objectID range",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event1.deferredBuffer",
+          "value": [],
+          "offset": 8,
+          "handle": 2270375955,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 524288,
+          "range": [],
+          "isArray": 1,
+          "isPtr": 0,
+          "size": [
+            0,
+            0
+          ],
+          "usage": "state",
+          "description": "Captured payload for deferred processing",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event1.pAWE",
+          "value": [],
+          "offset": 8,
+          "handle": 122892308,
+          "dataType": "AWEInstance*",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 1048576,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 1,
+          "size": [
+            0,
+            0
+          ],
+          "usage": "state",
+          "description": "Pointer to hold AWEInstance pointer",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event1.userHandle",
+          "value": [],
+          "offset": 8,
+          "handle": 122892309,
+          "dataType": "void*",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 2097152,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 1,
+          "size": [
+            0,
+            0
+          ],
+          "usage": "state",
+          "description": "Pointer to hold the user managed handle",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        }
+      ]
+    },
+    {
+      "name": "Event2",
+      "description": "Event Module",
+      "status": "active",
+      "className": "Event",
+      "classID": 1446,
+      "objectID": 31111,
+      "clockDivider": "1A0",
+      "controllingModules": [],
+      "variables": [
+        {
+          "name": "Event2.eventType",
+          "value": 31,
+          "offset": 8,
+          "handle": 127430664,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 256,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "const",
+          "description": "Event type, defined by this module instance",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event2.triggerType",
+          "value": 2,
+          "offset": 8,
+          "handle": 127430665,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 512,
+          "range": [
+            0,
+            4,
+            0
+          ],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "parameter",
+          "description": "Trigger Type",
+          "units": "",
+          "isRangeEditable": 0,
+          "nameValueList": [
+            {
+              "value": 0,
+              "name": "RISING_EDGE"
+            },
+            {
+              "value": 1,
+              "name": "FALLING_EDGE"
+            },
+            {
+              "value": 2,
+              "name": "HIGH"
+            },
+            {
+              "value": 3,
+              "name": "LOW"
+            },
+            {
+              "value": 4,
+              "name": "NONE"
+            }
+          ],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event2.resetTriggerCnts",
+          "value": 0,
+          "offset": 8,
+          "handle": 127430666,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 1024,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "state",
+          "description": "Used to reset the triggerCnt and failedTriggerCnt.",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event2.triggerBehavior",
+          "value": 0,
+          "offset": 8,
+          "handle": 127430667,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 2048,
+          "range": [
+            0,
+            1,
+            0
+          ],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "parameter",
+          "description": "Controls whether the event is triggered immediately, or in deferred processing",
+          "units": "",
+          "isRangeEditable": 0,
+          "nameValueList": [
+            {
+              "value": 0,
+              "name": "Instant"
+            },
+            {
+              "value": 1,
+              "name": "Deferred"
+            }
+          ],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event2.prevTriggerValue",
+          "value": 0,
+          "offset": 8,
+          "handle": 127430668,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 4096,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "parameter",
+          "description": "Internal variable to store old trigger value",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event2.isCallbackRegistered",
+          "value": 0,
+          "offset": 8,
+          "handle": 127430669,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 8192,
+          "range": [
+            0,
+            1,
+            0
+          ],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "state",
+          "description": "Tracks whether there is an event callback registered on the target system",
+          "units": "",
+          "isRangeEditable": 0,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event2.triggerCnt",
+          "value": 0,
+          "offset": 8,
+          "handle": 127430670,
+          "dataType": "uint",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 16384,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "state",
+          "description": "Counts the number of times the module has successfully triggered the event callback",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event2.failedTriggerCnt",
+          "value": 0,
+          "offset": 8,
+          "handle": 127430671,
+          "dataType": "uint",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 32768,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "state",
+          "description": "Counts the number of times the event callback has failed to process the trigger",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event2.deferredProcessingActive",
+          "value": 0,
+          "offset": 8,
+          "handle": 127430672,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 65536,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "state",
+          "description": "State of deferred processing",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event2.deferredTriggerRequired",
+          "value": 0,
+          "offset": 8,
+          "handle": 127430673,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 131072,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "state",
+          "description": "Internal flag used to handle deferred processing",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event2.moduleObjId",
+          "value": 31111,
+          "offset": 8,
+          "handle": 127430674,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 262144,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "const",
+          "description": "Custom objectID of this module. -1 if not in custom objectID range",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event2.deferredBuffer",
+          "value": [],
+          "offset": 8,
+          "handle": 2274914323,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 524288,
+          "range": [],
+          "isArray": 1,
+          "isPtr": 0,
+          "size": [
+            0,
+            0
+          ],
+          "usage": "state",
+          "description": "Captured payload for deferred processing",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event2.pAWE",
+          "value": [],
+          "offset": 8,
+          "handle": 127430676,
+          "dataType": "AWEInstance*",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 1048576,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 1,
+          "size": [
+            0,
+            0
+          ],
+          "usage": "state",
+          "description": "Pointer to hold AWEInstance pointer",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Event2.userHandle",
+          "value": [],
+          "offset": 8,
+          "handle": 127430677,
+          "dataType": "void*",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 2097152,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 1,
+          "size": [
+            0,
+            0
+          ],
+          "usage": "state",
+          "description": "Pointer to hold the user managed handle",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        }
+      ]
+    },
+    {
+      "name": "EventTrigger",
+      "description": "Source buffer holding 1 wire of constant data",
+      "status": "active",
+      "className": "DCSourceInt",
+      "classID": 115,
+      "objectID": 30000,
+      "clockDivider": "1A0",
+      "controllingModules": [],
+      "variables": [
+        {
+          "name": "EventTrigger.value",
+          "value": 0,
+          "offset": 8,
+          "handle": 122880008,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 256,
+          "range": [
+            0,
+            1,
+            0
+          ],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "parameter",
+          "description": "Data Value",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        }
+      ]
+    },
+    {
+      "name": "RMSThreshold",
+      "description": "Outputs a constant DC value with optional input control pin to scale DC value.",
+      "status": "active",
+      "className": "DCSourceV2",
+      "classID": 114,
+      "objectID": 30004,
+      "clockDivider": "1A0",
+      "controllingModules": [],
+      "variables": [
+        {
+          "name": "RMSThreshold.value",
+          "value": -9.6,
+          "offset": 8,
+          "handle": 122896392,
+          "dataType": "float",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 256,
+          "range": [
+            -60,
+            20,
+            0
+          ],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "parameter",
+          "description": "Data Value",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        }
+      ]
+    },
+    {
+      "name": "Scaler1",
+      "description": "General purpose scaler with a single gain",
+      "status": "active",
+      "className": "ScalerV2",
+      "classID": 19,
+      "objectID": 30001,
+      "clockDivider": "1A0",
+      "controllingModules": [],
+      "variables": [
+        {
+          "name": "Scaler1.gain",
+          "value": 20.6755562,
+          "offset": 8,
+          "handle": 122884104,
+          "dataType": "float",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 256,
+          "range": [
+            -24,
+            24,
+            0
+          ],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "parameter",
+          "description": "Gain in either linear or dB units.",
+          "units": "dB",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Scaler1.smoothingTime",
+          "value": 10,
+          "offset": 8,
+          "handle": 122884105,
+          "dataType": "float",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 512,
+          "range": [
+            0,
+            1000,
+            0
+          ],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "parameter",
+          "description": "Time constant of the smoothing process (0 = unsmoothed).",
+          "units": "msec",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Scaler1.isDB",
+          "value": 1,
+          "offset": 8,
+          "handle": 122884106,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 1024,
+          "range": [
+            0,
+            1,
+            0
+          ],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "parameter",
+          "description": "Selects between linear (=0) and dB (=1) operation",
+          "units": "",
+          "isRangeEditable": 0,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Scaler1.targetGain",
+          "value": 10.8088083,
+          "offset": 8,
+          "handle": 122884107,
+          "dataType": "float",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 2048,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "derived",
+          "description": "Target gain in linear units.",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Scaler1.currentGain",
+          "value": 10.8088083,
+          "offset": 8,
+          "handle": 122884108,
+          "dataType": "float",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 4096,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "state",
+          "description": "Instantaneous gain applied by the module.",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "Scaler1.smoothingCoeff",
+          "value": 0.00208109617,
+          "offset": 8,
+          "handle": 122884109,
+          "dataType": "float",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 8192,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "derived",
+          "description": "Smoothing coefficient.",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        }
+      ]
+    },
+    {
+      "name": "SourceV2ASCII",
+      "description": "Source buffer holding 1 wire of integer data",
+      "status": "active",
+      "className": "SourceV2Int",
+      "classID": 247,
+      "objectID": 30002,
+      "clockDivider": "1A0",
+      "controllingModules": [],
+      "variables": [
+        {
+          "name": "SourceV2ASCII.BlockSize",
+          "value": 5,
+          "offset": 8,
+          "handle": 122888200,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 256,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "const",
+          "description": "Block Size",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "SourceV2ASCII.NumChannels",
+          "value": 1,
+          "offset": 8,
+          "handle": 122888201,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 512,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "const",
+          "description": "Number of Channels",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "SourceV2ASCII.SampleRate",
+          "value": 48000,
+          "offset": 8,
+          "handle": 122888202,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 1024,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "const",
+          "description": "Sample Rate",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "SourceV2ASCII.isComplex",
+          "value": 0,
+          "offset": 8,
+          "handle": 122888203,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 2048,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "const",
+          "description": "Is Complex",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "SourceV2ASCII.format",
+          "value": 1,
+          "offset": 8,
+          "handle": 122888204,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 4096,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "const",
+          "description": "Is interleaved Or deinterleaved",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "SourceV2ASCII.arrayHeap",
+          "value": 2,
+          "offset": 8,
+          "handle": 122888205,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 1,
+          "mask": 8192,
+          "range": [],
+          "isArray": 0,
+          "isPtr": 0,
+          "size": [
+            1,
+            1
+          ],
+          "usage": "const",
+          "description": "Heap in which to allocate memory.",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        },
+        {
+          "name": "SourceV2ASCII.value",
+          "value": [
+            1.953719636E+9,
+            1.936942413E+9,
+            6.645601E+6,
+            0,
+            -2.147483648E+9
+          ],
+          "offset": 8,
+          "handle": 2270371854,
+          "dataType": "int",
+          "isComplex": 0,
+          "isHidden": 0,
+          "mask": 16384,
+          "range": [],
+          "isArray": 1,
+          "isPtr": 0,
+          "size": [
+            5,
+            1
+          ],
+          "usage": "parameter",
+          "description": "Array of integer data",
+          "units": "",
+          "isRangeEditable": 1,
+          "nameValueList": [],
+          "controllingModules": [],
+          "presetGroup": ""
+        }
+      ]
+    }
+  ],
+  "awb": {
+    "md5": "8e8104f7732593227acb3af7a8f06d2e",
+    "isEncrypted": 0,
+    "data": [
+      "0002000C00CA008EFFFFFFFF0000000200060006473B80004000C001000000300000000000060006",
+      "473B80004000C0010000003000000000000400070000000100000001000400070000000200000002",
+      "00060006473B80004000C001000000300000000000060006473B8000400004010000000100000000",
+      "00060006473B800040001401000000050000000000060006447A0000400004010000000100000000",
+      "00060006473B80004000C001000000300000000000060006447A0000400004010000000100000000",
+      "00060006447A000040000401000000010000000000060006447A0000400004020000000100000000",
+      "00060006473B80004000C010000000300000000000060006447A0000400004050000000100000000",
+      "003F000FBEEF4EE600000200000000380000000B0000000C00000001000000010000000000000002",
+      "00000000000000000000000000000000000000000000000100000000000000010000000000000000",
+      "000000000000000000000010000000300000BB800000000100000001FFFFFFFFFFFFFFFFFFFFFFFF",
+      "FFFFFFFFFFFFFFFF41A6AAABFFFFFFFF000000010000FFFF00000020000000100000000100000000",
+      "000000000000000100000010000000000000000300000001FFFFFFFFFFFFFFFF0000000000000002",
+      "00000020000000000000000000000000000000000000000000000000000000000000000000000000",
+      "00000000000000000009000FBEEF0866000001010000000200000001000000030000000100000000",
+      "0009000FBEEF0866000001010000000200000003000000020000000000000001000400130000000F",
+      "000000020007000FBEEF087300000100000000010000000400000000000C000FBEEF08F700000100",
+      "000000060000000500000005000000010000BB80000000000000000100000002000B003D0001180E",
+      "000000000000400000000005747365547373654D0065676100000000800000000012000FBEEF0DA6",
+      "000000020000000B00000004000000050000000A0000000000000000000000000000000000000000",
+      "00000000000000000000000000000000000075330007000FBEEF0872000001000000000100000006",
+      "C119999A0000000000BF008EFFFFFFFF000000020008000FBEEF087C000101000000000100000003",
+      "000000073DCCCCCD0006003C000150082082353F00000100000000000004000100000014FFFFFF00",
+      "000D000FBEEF08130000010100000006000000030000000341A5678A4120000000000001412CF0E1",
+      "412CF0E13B086300000F000FBEEF087F000001010000000800000003000000080000000000000000",
+      "00000000800000003F8000000000000000000000000000000007000FBEEF08480000010100000000",
+      "00000008000000080009000FBEEF0826000001020000000100000008000000060000000900000004",
+      "0008000FBEEF0862000001020000000000000008000000060000000A0012000FBEEF0DA600000002",
+      "0000000B000000090000000A0000001F000000020000000000000000000000000000000000000000",
+      "00000000000000000000000000007987003F000FBEEF4EE600000101000000380000000B0000000C",
+      "00000000000000010000000000000002000000000000000000000000000000000000000000000001",
+      "00000000000000010000000000000000000000000000000100000010000000300000BB8000000001",
+      "00000001FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF41A6AAABFFFFFFFF000000010000FFFF",
+      "00000020000000100000000100000000000000000000000200000010000000000000000300000001",
+      "FFFFFFFFFFFFFFFF0000000000000002000000200000000000000000000000000000000000000000",
+      "000000000000000000000000000000000000000000000000000500100000000F0000000100000000",
+      "0013002F0000001F000000000000000E0000000F0000001000000011000000120000001300000014",
+      "00000018000000190000001A0000001B0000001C0000001D0000000D0000001E0004005600000010",
+      "00007530000400560000001100007532000400560000001200007533000400560000001300007534",
+      "000400560000001800007531000400560000001D000079870006003C000150082082353F00000100",
+      "00000000000000000002001B"
+    ]
+  }
+}

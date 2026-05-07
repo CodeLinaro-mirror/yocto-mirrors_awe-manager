@@ -1,0 +1,21 @@
+[Unit]
+Description=AWE Manager Service
+Documentation=https://dochub.dspconcepts.com/awe-manager/latest/
+# Start after the network is up so the socket connection to AWECore can be established.
+After=network.target
+
+[Service]
+Type=simple
+# The binary path is set by CMake at install time from CMAKE_INSTALL_PREFIX.
+ExecStart=@CMAKE_INSTALL_FULL_BINDIR@/awemgr_service -awc /etc/aweq/awc_index.awc -design Main -shell_socket 9000
+# Restart on unexpected exit (e.g. crash), but not on clean shutdown (exit 0).
+Restart=on-failure
+RestartSec=5s
+# All output goes to the journal.  The SD_* priority prefixes embedded in the
+# binary's log output are interpreted by journald automatically.
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=awemgr
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,33 @@
+signalflow:
+  name: Main
+  awc: ../awc/tl_4inst.awc
+
+  presets:
+    - name: DC_Change
+      awb: ../presets/preset_tl.awb
+
+  sub_canvases:
+    - name: Multiplier0
+      awe_path: Subcanvas_Inst0
+      awc: ../awc/sc_multiply-mini.awc
+      presets:
+        - name: Preset1_0
+          awb: ../presets/preset1.awb
+    - name: Multiplier1
+      awe_path: Subcanvas_Inst1
+      awc: ../awc/sc_multiply-mini.awc
+      presets:
+        - name: Preset1_1
+          awb: ../presets/preset1.awb
+    - name: Multiplier2
+      awe_path: Subcanvas_Inst2
+      awc: ../awc/sc_multiply-mini.awc
+      presets:
+        - name: Preset1_2
+          awb: ../presets/preset1.awb
+    - name: Multiplier3
+      awe_path: Subcanvas_Inst3
+      awc: ../awc/sc_multiply-mini.awc
+      presets:
+        - name: Preset1_3
+          awb: ../presets/preset1.awb

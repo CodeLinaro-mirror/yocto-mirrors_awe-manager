@@ -1,0 +1,14 @@
+@startuml 1_context
+
+package "AWE-Manager" as awe_mgr  #AAAFAA {
+
+    [awe_AWC] as awc_s #8888FF
+    [awe_CMD] as cmd_s
+    [awe_COMM] as comm_s
+    database "AWC" #AACCFF
+
+    awc_s <- AWC : parses and reads
+
+}
+
+@enduml
