@@ -1,0 +1,8 @@
+signalflow:
+  name: Main
+  awc: ../awc/tl_1inst_max.awc
+
+  sub_canvases:
+    - name: Multiplier0
+      awe_path: Subcanvas1
+      awc: ../awc/sc_multiply-maxi.awc

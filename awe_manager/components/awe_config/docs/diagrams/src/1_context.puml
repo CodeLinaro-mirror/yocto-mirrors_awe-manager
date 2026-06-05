@@ -1,0 +1,12 @@
+@startuml 1_context
+!theme vibrant
+
+package "AWE-Manager" as awe_mgr  #AAAFAA {
+    [awe_CMD] as cmd_s
+    [awe_COMM] as comm_s
+}
+
+[awe_CONFIG] as cfg_s
+
+cfg_s --> awe_mgr : set / retrieve configurations
+@enduml

@@ -1,0 +1,42 @@
+/* define system colors
+ */
+/*
+ :root {
+  --md-primary-fg-color:        #EE0F0F;
+  --md-primary-fg-color--light: #ECB7B7;
+  --md-primary-fg-color--dark:  #90030C;
+}
+:root, [data-md-color-scheme=default] {
+    --md-footer-fg-color: #fff;
+    --md-footer-fg-color--light: #ffffffb3;
+    --md-footer-fg-color--lighter: #ffffff73;
+    --md-footer-bg-color: #ba5e5ede;
+    --md-footer-bg-color--dark: #00000052;
+}
+:root, [data-md-color-scheme=slate] {
+    --md-footer-fg-color: #fff;
+    --md-footer-fg-color--light: #ffffffb3;
+    --md-footer-fg-color--lighter: #ffffff73;
+    --md-footer-bg-color: #ba5e5ede;
+    --md-footer-bg-color--dark: #00000052;
+}
+*/
+
+
+/* use whole screen width: idea from
+   https://github.com/squidfunk/mkdocs-material/issues/619#issuecomment-348610715
+ */
+@media only screen and (min-width: 76.25em) {
+  .md-main__inner {
+    max-width: none;
+  }
+  .md-sidebar--primary {
+    left: 0;
+  }
+  .md-sidebar--secondary {
+    right: 0;
+    margin-left: 0;
+    -webkit-transform: none;
+    transform: none;
+  }
+}

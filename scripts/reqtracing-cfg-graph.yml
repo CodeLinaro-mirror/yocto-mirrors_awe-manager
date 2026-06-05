@@ -1,0 +1,30 @@
+dir_or_file:
+  - awe_manager/tests/src
+  - awe_manager/components/awe_cmd/tests
+  - awe_manager/components/awe_awc/tests
+  - awe_manager/components/awe_comm/tests
+  - awe_manager/components/awe_config/tests
+  - awe_manager/components/awe_osal/tests
+  - awe_manager/components/logging/tests
+
+  - awe_manager/docs
+  - awe_manager/components/awe_cmd/docs
+  - awe_manager/components/awe_awc/docs
+  - awe_manager/components/awe_comm/docs
+  - awe_manager/components/awe_config/docs
+  - awe_manager/components/awe_osal/docs
+  - awe_manager/components/logging/docs
+
+  - awe_manager/addons/shell/docs
+  - awe_manager/addons/serversocket/docs
+  - awe_manager/apps/service/docs
+
+formats: [console]
+importers: [yml, source]
+exporters: [graph]
+outfiles: [stdout] # actually dont care for outfiles and formats when "graph" exporter; still required
+
+verbose: 2
+
+format: tree
+

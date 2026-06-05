@@ -1,0 +1,23 @@
+@startuml 1_context
+
+[AWE-Controller] as ctrl
+[Tuning Relay] as tune
+[AweMgr-IDbg-Shell] as shell
+
+package "AWE-Manager" as awe_mgr  #AAAFAA {
+    [awe_COMM] as comm_s #8888FF
+}
+
+ctrl -d-> awe_mgr
+tune -d-> awe_mgr
+shell -d-> awe_mgr
+
+package "Audio Processors" as awe_task  #AAAFAA {
+
+    package "aDSP" {
+        ["awe_COMM"] as comm_c #8888FF
+        [AWE Core] as lib
+    }
+}
+comm_s <-[#green,dashed,thickness=10]-> comm_c
+@enduml

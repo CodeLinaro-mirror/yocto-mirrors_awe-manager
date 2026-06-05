@@ -1,0 +1,36 @@
+
+# defines the path where to find the JINJA2 files
+# this is relative to the current directory
+template_dir: ./templates
+
+# contains the key-value mapping of variable types in the spec (key), to
+# the variable type in the corresponding target language (value)
+vartypes:
+  float: float
+  int: int
+  enum: Enum
+  bool: bool
+
+# list of JINJA2 template files that will be used to generate specific files
+# for each control vector; needs to given! otherwise no information is
+# collected for the collectiontemplates :(
+vectortemplates:
+  - file: dummy.jinja2
+    baseout: "_ignore_for_now_"
+    ext: .txt
+
+# in case the interface spec referred to enumeration or bitfield values,
+# special templates can be used; for example, this allows to generate
+# a dedicated file for each Enum class
+enumtemplates: {}
+bitfieldtemplates: {}
+
+collectiontemplates:
+  - file: awc_simple.jinja2
+    baseout: awc_index
+    ext: .txt
+
+# in case of code generation, the typical code for a control vector may
+# inherit from a specific base class or uses certain common functions
+# (like the validators); these can be generated with the basetemplates
+basetemplates: {}

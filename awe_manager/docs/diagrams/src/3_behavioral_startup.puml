@@ -1,0 +1,43 @@
+@startuml 3_behavioral_startup
+skinparam BoxPadding 15
+
+box "AWE Service" #AAAFAA
+participant "AWE Controller" as ctrl
+participant "AWE-Manager" as awemgr #8888FF
+end box
+database "AWC\nDB" as awc
+
+box "Audio Processors"
+participant "Audio Processors" as DSP #8888FF
+participant "AWECore\nLib" as core #4444FF
+end box
+
+ctrl -> awemgr: awemgr_init(... &mgr_p)
+note over awemgr: Initializes Memory &\nCommunication\nto AWE-HostTask
+awemgr --> ctrl:
+
+ctrl -> awemgr: awemgr_load_awc(mgr_p, "Main", endpoint)
+awemgr <-> awc: parse & read
+note over awemgr: AWC data\nin memory
+awemgr --> ctrl:
+
+opt but recommended
+ctrl -> awemgr: awemgr_get_awc_context(mgr_p, endpoint)
+note over awemgr: Gets AWC context\nfor endpoint
+awemgr --> ctrl: awectx_p
+
+ctrl -> awemgr: awemgr_get_target_info(mgr_p, ...)
+awemgr <-[#blue]> DSP: tune command getinfo
+DSP <-> core: packetProcess()
+awemgr --> ctrl: 
+note over ctrl: trace HostTask info
+end
+
+... load design, enumerate, etc ...
+
+ctrl -> awemgr: awemgr_exit(&mgr_p)
+note over awemgr: Unloads AWC,\nfrees memory &\ndisconnects from\nAWE-HostTask
+awemgr --> ctrl:
+
+
+@enduml

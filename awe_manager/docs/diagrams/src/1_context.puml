@@ -1,0 +1,35 @@
+@startuml 1_context
+
+skinparam BoxPadding 15
+skinparam componentStyle rectangle
+
+
+package "AWE Service" as awe_ctrl  #AAAFAA {
+
+    [AWE-Manager] as dspc #8888FF
+    [AWE Controller] as ctrl
+}
+
+interface "IPC" as CIF
+interface "SHMEM/\nsocket" as shmem
+
+[Client 1] -> CIF
+[Client 2] -> CIF
+[Client 3\n(via VirtIO)] -> CIF
+CIF - ctrl
+database "AWC" as AWC
+
+ctrl -> dspc
+dspc - shmem
+dspc <-- AWC
+
+[PC] --> ctrl
+
+package "Audio Processors (DSPs)" as s {
+    [AWECore 2]
+    [AWECore 1]
+}
+
+shmem - s
+
+@enduml

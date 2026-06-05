@@ -1,0 +1,11 @@
+site_name: Tuning Server Addon
+
+docs_dir: docs
+
+nav:
+  - Overview: "0_overview.md"
+  - Context: "1_context_view.md"
+  - Structure: "2_structural_view.md"
+  - Behavior: "3_behavioral_view.md"
+  - Resources: "4_resource_view.md"
+  - Requirements: "99_requirements.md"
