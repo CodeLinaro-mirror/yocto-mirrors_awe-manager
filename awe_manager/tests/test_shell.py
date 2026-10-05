@@ -118,6 +118,34 @@ def test_cfg_shows_config(shell):
     assert "key: mgr.api.log.level" in response, f"Expected key: mgr.api.log.level in cfg output: {response!r}"
 
 
+def test_repeat_reports_number_of_calls(shell):
+    """repeat runs the given command for -sec seconds and counts the executions."""
+    import yaml
+    response = shell.exe_cmd('repeat -cmd version -sec 1')
+    assert not _is_error(response), f"repeat failed: {response!r}"
+
+    result = yaml.safe_load(response)["repeat"]
+    assert result["command"] == "version"
+    assert result["calls"] > 0, f"Expected at least one call: {response!r}"
+    assert result["duration_sec"] >= 1.0, f"Expected to repeat for 1s: {response!r}"
+    # without -verbose the output of the repeated command must not show up
+    assert "awemgr_version" not in response, f"Expected no command output: {response!r}"
+
+
+def test_repeat_verbose_shows_command_output(shell):
+    """repeat -verbose prints the output of the repeated command as well."""
+    response = shell.exe_cmd('repeat -cmd version -sec 1 -verbose')
+    assert not _is_error(response), f"repeat failed: {response!r}"
+    assert "awemgr_version" in response, f"Expected command output: {response!r}"
+    assert "repeat:" in response, f"Expected repeat summary: {response!r}"
+
+
+def test_repeat_without_command_reports_error(shell):
+    """repeat needs a command to repeat."""
+    response = shell.exe_cmd("repeat -sec 1")
+    assert _is_error(response), f"Expected error, got: {response!r}"
+
+
 def test_comm_trace_on_off(shell):
     """comm-trace -on followed by -off should be accepted without error."""
     on_resp = shell.exe_cmd("comm-trace -on")

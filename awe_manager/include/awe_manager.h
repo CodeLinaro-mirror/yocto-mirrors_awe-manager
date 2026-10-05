@@ -48,6 +48,13 @@ extern "C" {
 */
 #define MAX_AWE_ENDPOINTS  16
 
+/** @brief Number of cores/instances supported per endpoint/canvas.
+ * Endpoint and core index share one byte of the tuning message header - four
+ * bits each - so both are limited to 0 .. 15. Passing a larger index would
+ * corrupt the message header, therefore the API rejects it.
+*/
+#define MAX_AWE_CORES      16
+
 /** @brief defines the maximum length (in chars) of the plugin/library name including the null termination */
 #define AWEMGR_MAX_PLUGIN_NAME_LEN 64
 
@@ -85,7 +92,7 @@ extern "C" {
  * | `mgr.comm.buffersize` | Size of communication buffer | `264` or `4096` - depending on platform | <integer value> |
  * | `mgr.comm.timeoutms` | Number of milliseconds to wait for response | `2000` | <integer value> |
  * | `mgr.comm.trace.state` | Enable or disable tracing of tuning messages and events | `false` | `true`, `false`, `1`, `0` |
- * | `mgr.comm.trace.file` | When tracing is enabled write (binary) trace data to this file | `~` | `~` for no file, path otherwise |
+ * | `mgr.comm.trace.file` | When tracing is enabled, write (binary) trace data to files derived from this basename (TX to `<name>.tx`, RX to `<name>.rx`). Note that data may be buffered by the OS. The buffers are flushed when the trace is disabled. | `~` | `~` for no file, basename otherwise |
  * | `mgr.event.socket.ip` | IP address for socket-based event transmission | `127.0.0.1` | IP address string |
  * | `mgr.event.socket.port` | Port for socket-based event transmission | `15010` | <integer value> |
  * | `mgr.event.trace.state` | Enable or disable tracing of event messages | `false` | `true`, `false`, `1`, `0` |
@@ -151,14 +158,18 @@ extern "C" {
  * @brief Error codes returned by _AWE-Manager_ methods.
  */
 enum awemgr_rc {
+    awemgr_RC_COMM_FAIL = -6,       /**< the communication with AWECore failed (connection not
+                                         available or lost, send or receive error) */
+    awemgr_RC_ERR_DESIGN_NOTFOUND = -5, /**< the design was not found in the AWC; use this error code to check for existence of a design name */
     awemgr_RC_ERR_INVALID_VAL = -4, /**< a value for awemgr_control_write() was outside the
                                          allowed range */
     awemgr_RC_AWECORE_ERROR = -3,   /**< AWECore has returned an error */
     awemgr_RC_COMM_TIMEOUT = -2,    /**< this error code is returned when a timeout occurs while
                                          receiving data from bsp */
-	awemgr_RC_ERR = -1,             /**< generic error code */
+    awemgr_RC_ERR = -1,             /**< generic error code, e.g. an invalid argument; a failed
+                                         communication is reported as awemgr_RC_COMM_FAIL */
     awemgr_RC_OK = 0,               /**< all good */
-	awemgr_RC_MAX
+    awemgr_RC_MAX
 };
 
 /**
@@ -234,8 +245,8 @@ struct awemgr_ctl_elem_info {
             float step;
         } f32;
         // todo: enums!
-	} range;
-	// todo: add reserved etc...
+    } range;
+    // todo: add reserved etc...
 };
 
 /**
@@ -665,8 +676,8 @@ enum awemgr_rc  awemgr_get_target_info(struct awemgr_data* mgr_p, awemgr_targeti
  * @brief Returns the information about the current CPU load.
  *
  * @param mgr_p[in] - Handle of awe manager
- * @param endpointId[in] - Query a specific endpoint/canvas
- * @param coreId[in] - Selects the core on which the AWE-Core instance runs (on a multi-core system)
+ * @param endpointId[in] - Query a specific endpoint/canvas, `0` to `MAX_AWE_ENDPOINTS-1`
+ * @param coreId[in] - Selects the core on which the AWE-Core instance runs (on a multi-core system), `0` to `MAX_AWE_CORES-1`
  * @param info_buffer[out] - will be updated to contain information structures of all AWE instances
  *
  * @return error code
@@ -681,8 +692,8 @@ enum awemgr_rc  awemgr_get_cpu_info(struct awemgr_data* mgr_p, int endpointId, i
  * at the AWE Core instance.
  *
  * @param mgr_p[in] - Handle of awe manager
- * @param endpointId[in] - Query a specific endpoint/canvas
- * @param coreId[in] - Selects the core on which the AWE-Core instance runs (on a multi-core system)
+ * @param endpointId[in] - Query a specific endpoint/canvas, `0` to `MAX_AWE_ENDPOINTS-1`
+ * @param coreId[in] - Selects the core on which the AWE-Core instance runs (on a multi-core system), `0` to `MAX_AWE_CORES-1`
  * @param info_buffer[out] - will be updated to contain information structures of all AWE instances
  *
  * @return error code
@@ -698,8 +709,8 @@ enum awemgr_rc  awemgr_get_modulelist_info(struct awemgr_data* mgr_p, int endpoi
  * slow and shared heap memories.
  *
  * @param mgr_p[in] - Handle of awe manager
- * @param endpointId[in] - Query a specific endpoint/canvas
- * @param coreId[in] - Selects the core on which the AWE-Core instance runs (on a multi-core system)
+ * @param endpointId[in] - Query a specific endpoint/canvas, `0` to `MAX_AWE_ENDPOINTS-1`
+ * @param coreId[in] - Selects the core on which the AWE-Core instance runs (on a multi-core system), `0` to `MAX_AWE_CORES-1`
  * @param info_buffer[out] - will be updated with information about the (heap) memory allocation
  *
  * @return error code
@@ -711,8 +722,8 @@ enum awemgr_rc awemgr_get_heap_info(struct awemgr_data* mgr_p, int endpointId, i
  * @brief Returns information about a specific or about all layouts.
  *
  * @param mgr_p[in] - Handle of awe manager
- * @param endpointId[in] - Query a specific endpoint/canvas
- * @param coreId[in] - Selects the core on which the AWE-Core instance runs (on a multi-core system)
+ * @param endpointId[in] - Query a specific endpoint/canvas, `0` to `MAX_AWE_ENDPOINTS-1`
+ * @param coreId[in] - Selects the core on which the AWE-Core instance runs (on a multi-core system), `0` to `MAX_AWE_CORES-1`
  * @param info_buffer[out] - will be updated to contain information structures of all AWE instances
  *
  * @return error code
@@ -816,6 +827,26 @@ int  awemgr_get_design_count(struct awemgr_ctx *ctx_p);
  * @return error code
  */
 enum awemgr_rc  awemgr_get_design_info(struct awemgr_ctx *ctx_p, int index, struct awemgr_design_info *info);
+
+
+/**
+ * @brief Retrieves information about a specific design, given its name.
+ *
+ * This is the name based counterpart of awemgr_get_design_info(). It saves iterating
+ * over all designs when the name is known, e.g. from the AWC index file, but the
+ * index is not.
+ *
+ * The name is resolved the same way as in awemgr_load_design(), so a name accepted
+ * there is accepted here as well.
+ *
+ * @param ctx_p[in] - Handle of an AWC context
+ * @param design_name[in] - name of the design, as it is stored in the AWC
+ * @param info[out] - pointer to a structure to be filled
+ *
+ * @return error code; `awemgr_RC_ERR_DESIGN_NOTFOUND` in case the design name is not
+ *         known in the AWC, which is a convenient way to check for its existence.
+ */
+enum awemgr_rc  awemgr_get_design_info_by_name(struct awemgr_ctx *ctx_p, const char *design_name, struct awemgr_design_info *info);
 
 
 /**

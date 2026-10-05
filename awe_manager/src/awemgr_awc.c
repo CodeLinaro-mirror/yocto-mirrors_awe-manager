@@ -76,10 +76,8 @@ struct awemgr_ctx* awemgr_get_awc_context(struct awemgr_data *mgr_p, int endpoin
 enum awemgr_rc awemgr_load_awc(struct awemgr_data *mgr_p, const char *awcFileName, int endpointId)
 {
     AWEMGR_FAIL_ON_HANDLE_NULL(mgr_p);
-    if (endpointId < 0 || endpointId >= MAX_AWE_ENDPOINTS) {
-        AWEMGR_API_LOGE("Invalid argument: endpoint %d is outside of supported values (0 to %d).", endpointId, MAX_AWE_ENDPOINTS-1);
-        return awemgr_RC_ERR;
-    }
+    AWEMGR_FAIL_ON_ENDPOINT_INVALID(endpointId);
+
     struct awemgr_ctx *ctx_p = NULL;
 
     if (mgr_p->endpoints[endpointId].awc !=NULL)
@@ -162,10 +160,7 @@ enum awemgr_rc awemgr_load_awc(struct awemgr_data *mgr_p, const char *awcFileNam
 enum awemgr_rc awemgr_unload_awc(struct awemgr_data *mgr_p, int endpointId)
 {
     AWEMGR_FAIL_ON_HANDLE_NULL(mgr_p);
-    if (endpointId < 0 || endpointId >= MAX_AWE_ENDPOINTS) {
-        AWEMGR_API_LOGE("Invalid argument: endpoint variable value outside of supported values (0 to %d).", MAX_AWE_ENDPOINTS-1);
-        return awemgr_RC_ERR;
-    }
+    AWEMGR_FAIL_ON_ENDPOINT_INVALID(endpointId);
 
     struct awemgr_ctx *ctx_p = NULL;
     if (mgr_p->endpoints[endpointId].awc)

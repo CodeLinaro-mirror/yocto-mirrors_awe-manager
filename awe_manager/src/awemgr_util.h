@@ -49,6 +49,22 @@ typedef struct {
      return awemgr_RC_ERR;                                \
      }
 
+// helper macros to check an endpoint/core index parameter, bail out and report
+// error. Both indices are packed into the tuning message header (four bits
+// each), so an out of range value corrupts the header - including its length
+// field - instead of just addressing a non-existing endpoint or core.
+#define AWEMGR_FAIL_ON_ENDPOINT_INVALID(id)    if (((id) < 0) || ((id) >= MAX_AWE_ENDPOINTS)) {  \
+     AWEMGR_API_LOGE("Invalid argument: endpoint %d is outside of supported values (0 to %d).",  \
+                     (id), MAX_AWE_ENDPOINTS - 1);                                              \
+     return awemgr_RC_ERR;                                \
+     }
+
+#define AWEMGR_FAIL_ON_CORE_INVALID(id)    if (((id) < 0) || ((id) >= MAX_AWE_CORES)) {          \
+     AWEMGR_API_LOGE("Invalid argument: core %d is outside of supported values (0 to %d).",      \
+                     (id), MAX_AWE_CORES - 1);                                                  \
+     return awemgr_RC_ERR;                                \
+     }
+
 
 
 #define AWEMGR_FAIL_ON_ACQUIRE_BUFFER(comm_statement) \
@@ -60,6 +76,9 @@ void copy_ctl_info(awc_ctl_t* var_p, struct awemgr_ctl_elem_info *info);
 
 void copyInfoFromAwcModule(struct awemgr_module *mod, const awc_module_t* awc_module);
 void awemgr_copy_usrdata(const awc_dict_element* src, awemgr_userdata* dst);
+
+/* maps an AWECOMM_RC_* code: timeout and failed communication keep their own code, everything else is awemgr_RC_ERR */
+enum awemgr_rc awemgr_comm_rc_to_mgr_rc(int comm_rc);
 
 enum awemgr_rc safe_transact(struct awecomm_data *comm_p, struct awecmd_st *buf_p, unsigned int *result_buffer_p, unsigned int result_buffer_size_in_words, unsigned int* rx_words_received_p);
 

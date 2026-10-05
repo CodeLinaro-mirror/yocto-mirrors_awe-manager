@@ -42,6 +42,61 @@ For command specific help: try  <cmd> -h{elp}
 
 Note: instead of the commands `quit` and `exit` also the keyboard <CTRL-D> can be used.
 
+## Repeating a command
+
+The `repeat` command executes another command over and over again for a given
+number of seconds and prints how many executions were performed. This is handy
+for quick throughput or soak checks:
+
+```
+awemgr-shell > repeat -cmd "get_value -var Scaler1.gain" -sec 5
+repeat:
+  command: "get_value -var Scaler1.gain"
+  duration_sec: 5.000431
+  calls: 4271
+  calls_per_sec: 854.20
+```
+
+Quote the repeated command when it has parameters of its own. The output of
+the repeated command is suppressed, so that only the summary of the run is
+printed; use `-verbose` to see the output of every single execution as well.
+`-sec` defaults to 1.
+
+Use `-count <number>` to end the run after a fixed number of executions instead
+of after a time. This measures a known amount of work rather than a duration,
+which keeps a check reproducible on machines of different speed:
+
+```
+awemgr-shell > repeat -cmd "get_value -var Scaler1.gain" -count 1000
+repeat:
+  command: "get_value -var Scaler1.gain"
+  duration_sec: 1.170884
+  calls: 1000
+  calls_per_sec: 854.00
+```
+
+`-count` takes precedence over `-sec`, which is not used when a count is given.
+
+By default the command is repeated as fast as possible. Use `-throttle <usec>`
+to insert a delay between two executions, which keeps a soak run at a defined
+load instead of saturating a core:
+
+```
+awemgr-shell > repeat -cmd "get_value -var Scaler1.gain" -sec 5 -throttle 10000
+repeat:
+  command: "get_value -var Scaler1.gain"
+  duration_sec: 5.004219
+  calls: 486
+  calls_per_sec: 97.12
+```
+
+A `repeat` cannot repeat another `repeat` - the reported `calls` would count
+the inner runs instead of the repeated command - and is rejected with an error.
+Repeating a `script` that starts a `repeat` is rejected for the same reason;
+starting a `repeat` from a script file is fine. Script files may include
+further script files up to 8 levels deep, which stops a script that includes
+itself from running until the stack is exhausted.
+
 ## AWEMgr-Shell on PC (Linux / Windows)
 
 When compiling AWE-Manager for the PC (Linux-x64 or Windows), the system uses a socket connection

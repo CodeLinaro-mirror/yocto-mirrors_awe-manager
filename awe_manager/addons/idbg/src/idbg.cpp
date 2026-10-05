@@ -15,12 +15,62 @@
 
 idbg_t   g_idbghdl;
 
+/* Buffer used to format a single idbg_print() into the capture buffer; longer
+ * output is formatted into an exactly fitting temporary instead. */
+#define IDBG_CAPTURE_FMT_SIZE  1024
+
+/* Portion of collected output handed to the output sink per call. Output sinks
+ * format into fixed size buffers - si_writef_va() uses MAX_LINE_LENGTH (1024),
+ * the Windows branch of the shell's socket sink uses 4096 - so the collected
+ * block is emitted in chunks that fit into any of them. Splitting is safe: the
+ * sinks write to a byte stream. */
+#define IDBG_FLUSH_CHUNK_SIZE  512
+
+/* ****************************************************************************
+ * LOCAL FUNCTIONS
+ * ***************************************************************************/
+
 static void v_idbg_print (idbg_t *p, const char *fmt, va_list ap)
 {
     (void)p; /* var not used; to avoid compiler warning */
 
     vprintf(fmt, ap);
     fflush(stdout);
+}
+
+/* Output sink installed while idbg_output_hold() is active: appends to the
+ * handle's capture buffer instead of writing to stdout/socket. */
+static void v_idbg_capture (idbg_t *p, const char *fmt, va_list ap)
+{
+    char    buf[IDBG_CAPTURE_FMT_SIZE];
+    va_list ap_retry;
+
+    va_copy (ap_retry, ap);
+
+    int n = vsnprintf (buf, sizeof(buf), fmt, ap);
+    if (n < 0)
+    {
+        /* encoding error - nothing sensible to collect */
+    }
+    else if ((size_t)n < sizeof(buf))
+    {
+        p->capture.append (buf, (size_t)n);
+    }
+    else
+    {
+        /* output longer than the stack buffer: format again into an exact fit */
+        std::string big ((size_t)n + 1U, '\0');
+        (void) vsnprintf (&big[0], big.size(), fmt, ap_retry);
+        p->capture.append (big, 0, (size_t)n);
+    }
+
+    va_end (ap_retry);
+}
+
+/** Output sink installed functions like "repeat": drops every output. */
+static void v_idbg_discard(idbg_t *p, const char *fmt, va_list ap)
+{
+    (void)p; (void)fmt; (void)ap;
 }
 
 
@@ -74,6 +124,9 @@ static char ** get_dir_list  (idbg_t *this_p, bool bDirOnly)
 
 }
 
+/* ****************************************************************************
+ * PUBLIC FUNCTIONS
+ * ***************************************************************************/
 
 int idbg_init (idbg_t **this_pp, idbgtableentry_t *starttbl_p)
 {
@@ -98,6 +151,12 @@ int idbg_init (idbg_t **this_pp, idbgtableentry_t *starttbl_p)
 
     this_p->table_level  = 0;
     this_p->print_fct_p   = v_idbg_print;
+    this_p->held_fct_p    = NULL;
+    this_p->hold_depth    = 0;
+    this_p->capture.clear();
+    this_p->saved_fct_p     = NULL;
+    this_p->saved_backend_p = NULL;
+    this_p->drop_depth      = 0;
 
     return 0;
 }
@@ -274,8 +333,122 @@ int idbg_print (idbg_t *this_p, const char *fmt, ...)
     if (this_p->print_fct_p)
         this_p->print_fct_p (this_p, fmt, ap);
 
+    va_end (ap);
+
     return 0;
 }
+
+int idbg_print_direct (idbg_t *this_p, const char *fmt, ...)
+{
+    va_list ap;
+
+    if (!this_p)
+        this_p = &g_idbghdl;
+
+    /* While output is held, print_fct_p is the capture sink and the real sink
+     * is kept in held_fct_p. print_fd_p is never touched by the hold, so the
+     * real sink still finds its backend (e.g. the socket fd). */
+    idbglib_print_func *fct_p = (this_p->hold_depth > 0) ? this_p->held_fct_p
+                                                         : this_p->print_fct_p;
+
+    va_start (ap, fmt);
+
+    if (fct_p)
+        fct_p (this_p, fmt, ap);
+
+    va_end (ap);
+
+    return 0;
+}
+
+int idbg_output_hold (idbg_t *this_p)
+{
+    if (!this_p)
+        this_p = &g_idbghdl;
+
+    if (this_p->hold_depth == 0)
+    {
+        this_p->held_fct_p  = this_p->print_fct_p;
+        this_p->print_fct_p = v_idbg_capture;
+        this_p->capture.clear();
+    }
+    this_p->hold_depth++;
+
+    return 0;
+}
+
+int idbg_output_flush (idbg_t *this_p)
+{
+    if (!this_p)
+        this_p = &g_idbghdl;
+
+    if (this_p->hold_depth == 0)
+        return -1; /* flush without a matching hold */
+
+    this_p->hold_depth--;
+    if (this_p->hold_depth > 0)
+        return 0; /* inner scope - keep collecting */
+
+    this_p->print_fct_p = this_p->held_fct_p;
+    this_p->held_fct_p  = NULL;
+
+    if (!this_p->capture.empty())
+    {
+        /* hand the buffer over before printing: the sink may print again */
+        std::string out;
+        out.swap (this_p->capture);
+
+        for (size_t pos = 0; pos < out.size(); pos += IDBG_FLUSH_CHUNK_SIZE)
+        {
+            size_t left = out.size() - pos;
+            int    len  = (int) ((left < IDBG_FLUSH_CHUNK_SIZE) ? left
+                                                                : (size_t)IDBG_FLUSH_CHUNK_SIZE);
+            (void) idbg_print (this_p, "%.*s", len, out.c_str() + pos);
+        }
+    }
+
+    return 0;
+}
+
+int idbg_output_disable (idbg_t *this_p)
+{
+    if (!this_p)
+        this_p = &g_idbghdl;
+
+    if (this_p->drop_depth == 0)
+    {
+        /* the sink currently receiving idbg_print(): while output is held that
+         * is the capture sink, so a drop inside a hold discards what is
+         * printed while it is active and leaves the collected block intact */
+        this_p->saved_fct_p     = this_p->print_fct_p;
+        this_p->saved_backend_p = this_p->print_fd_p;
+        this_p->print_fct_p     = v_idbg_discard;
+    }
+    this_p->drop_depth++;
+
+    return 0;
+}
+
+int idbg_output_enable (idbg_t *this_p)
+{
+    if (!this_p)
+        this_p = &g_idbghdl;
+
+    if (this_p->drop_depth == 0)
+        return -1; /* enable without a matching disable */
+
+    this_p->drop_depth--;
+    if (this_p->drop_depth > 0)
+        return 0; /* inner scope - keep dropping */
+
+    this_p->print_fct_p     = this_p->saved_fct_p;
+    this_p->print_fd_p      = this_p->saved_backend_p;
+    this_p->saved_fct_p     = NULL;
+    this_p->saved_backend_p = NULL;
+
+    return 0;
+}
+
 
 void  idbg_set_userdata (idbg_t *this_p, void *data_p)
 {
@@ -389,7 +562,13 @@ void  idbg_set_printfct (idbg_t *this_p, idbglib_print_func *fct_p, void* backen
 	if (!this_p)
 		this_p = &g_idbghdl;
 
-	this_p->print_fct_p = fct_p;
+    /* while output is held the capture sink must stay installed; exchange the
+     * real sink behind it instead */
+	if (this_p->hold_depth > 0)
+		this_p->held_fct_p = fct_p;
+	else
+		this_p->print_fct_p = fct_p;
+
     this_p->print_fd_p = backend_p;
 }
 
@@ -398,7 +577,11 @@ void idbg_reset_printfct (idbg_t *this_p)
 	if (!this_p)
 		this_p = &g_idbghdl;
 
-	this_p->print_fct_p = v_idbg_print;
+	if (this_p->hold_depth > 0)
+		this_p->held_fct_p = v_idbg_print;
+	else
+		this_p->print_fct_p = v_idbg_print;
+
     this_p->print_fd_p = NULL;
 }
 
@@ -408,4 +591,17 @@ void* idbg_get_printfct_backend(idbg_t *this_p)
 		this_p = &g_idbghdl;
 
     return this_p->print_fd_p;
+}
+
+idbglib_print_func *idbg_get_printfct (idbg_t *this_p)
+{
+	if (!this_p)
+		this_p = &g_idbghdl;
+
+    /* mirror idbg_set_printfct(): while output is held the capture sink is
+     * installed and the real sink is kept in held_fct_p */
+	if (this_p->hold_depth > 0)
+		return this_p->held_fct_p;
+
+	return this_p->print_fct_p;
 }

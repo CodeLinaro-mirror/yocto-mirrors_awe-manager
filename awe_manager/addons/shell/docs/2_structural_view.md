@@ -11,8 +11,9 @@
 | Module | Description |
 |--------|-------------|
 | `awemgr_shell.cpp` | Public API implementation: create/destroy, run modes, execute |
-| `cmds_base.cpp` | Base command set: `mgr-init`, `awc-load`, `design-load`, `show`, `script`, … |
+| `cmds_base.cpp` | Base command set: `mgr-init`, `awc-load`, `design-load`, `show`, `script`, `repeat`, … and the comm trace tap |
 | `cmds_control.cpp` | Control commands: `set_value`, `get_value`, `transact`, … |
+| `hlp_functions.h` | Shared command helpers: error printing macros and the output scope guards `IdbgOutputHold` (collect) and `IdbgOutputDrop` (discard) |
 
 ## Command tree layout
 

@@ -37,6 +37,8 @@ enum awemgr_rc  awemgr_get_modulelist_info(struct awemgr_data* mgr_p, int endpoi
 {
     AWEMGR_FAIL_ON_HANDLE_NULL(mgr_p);
     AWEMGR_FAIL_ON_HANDLE_NULL(info_buffer_p);
+    AWEMGR_FAIL_ON_ENDPOINT_INVALID(endpointId);
+    AWEMGR_FAIL_ON_CORE_INVALID(coreId);
 
     struct awecmd_st *buf_p = NULL;
 

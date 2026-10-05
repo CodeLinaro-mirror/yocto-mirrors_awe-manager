@@ -28,15 +28,25 @@
 #include "awe_comm.h"    // for setting configuration to AWECore
 #include "hlp_functions.h" // for helper functions like IDBG_PRINT_ERR
 
+#include "awosal_time.h"   // for aweosal_measure_start()/aweosal_measure_elapsed()
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 
+#include <string>
+#include <vector>
+
 
 // ******************************************************************************************************
-// Comm shell tap: prints raw TX/RX words to the shell socket via idbg_print.
+// Comm shell tap: prints raw TX/RX words to the shell socket via idbg_print_direct.
 // Installed by sys_comm_trace when -on -on is given; ctx is idbg_t *.
+//
+// The tap is called from within the AWE Manager API calls a command performs.
+// idbg_print_direct() is used so that the traces are never collected into a
+// command's held output buffer (see IdbgOutputHold) - they stream out as they
+// happen and the command's own output stays one contiguous block.
 
 static void comm_observer_cb(const char *direction, const void *data,
                              int data_sz_words, void *ctx)
@@ -46,17 +56,17 @@ static void comm_observer_cb(const char *direction, const void *data,
 
     idbg_t *p = (idbg_t *)ctx;
     const uint32_t *words = (const uint32_t *)data;
-    idbg_print(p, "%s: [\n", direction);
+    idbg_print_direct(p, "%s: [\n", direction);
     for (int i = 0; i < data_sz_words; ++i)
     {
         if (i % 8 == 0)
-            idbg_print(p, "   ");
-        idbg_print(p, "0x%08x", words[i]);
+            idbg_print_direct(p, "   ");
+        idbg_print_direct(p, "0x%08x", words[i]);
         bool last = (i + 1 == data_sz_words);
         if (!last)
-            idbg_print(p, (i + 1) % 8 == 0 ? ",\n" : ", ");
+            idbg_print_direct(p, (i + 1) % 8 == 0 ? ",\n" : ", ");
     }
-    idbg_print(p, "\n]\n");
+    idbg_print_direct(p, "\n]\n");
 }
 
 // ******************************************************************************************************
@@ -331,8 +341,8 @@ int sys_comm_trace(IDBG_PARAMS)
 
     if (IDBG_CHK_HELP || IDBG_ARG_ERROR || (enable_trace && disable_trace))
     {
-        IDBG_CMDUSAGE ((p, "[-file <filepath>] [-on][-off]",
-                        "-file <filepath>", "Store traces into file",
+        IDBG_CMDUSAGE ((p, "[-file <basename>] [-on][-off]",
+                        "-file <basename>", "Store traces into files (TX -> <basename>.tx, RX -> <basename>.rx)",
                         "-on",              "Enable COMM log traces",
                         "-off",             "Disable COMM log traces",
         				NULL, NULL));
@@ -399,6 +409,9 @@ int awc_select(IDBG_PARAMS)
     return IDBG_OK;
 }
 
+/** how deeply script files may include further script files */
+static const int MAX_SCRIPT_NESTING = 8;
+
 int script(IDBG_PARAMS)
 {
     struct app_ctx_ *appCtx_p = (struct app_ctx_ *) idbg_get_userdata(IDBG_HDL_VAR);
@@ -412,6 +425,20 @@ int script(IDBG_PARAMS)
         				NULL, NULL));
         return IDBG_OK;
     }
+
+    /* A script file may include further script files, but one that includes
+     * itself - directly or through a chain of others - would recurse until the
+     * stack is exhausted. */
+    CmdNestingGuard nesting((appCtx_p != NULL) ? &appCtx_p->script_nesting : NULL,
+                            MAX_SCRIPT_NESTING);
+    if (!nesting.allowed())
+    {
+        IDBG_PRINT_ERR(IDBG_HDL_VAR,
+            "script '%s' is nested more than %d levels deep - recursive include?\n",
+            script_file, MAX_SCRIPT_NESTING);
+        return IDBG_OK;
+    }
+
     int retval = appCtx_p->idbg_srv_p->runFile(script_file);
     if (retval) {
         IDBG_PRINT_ERR_AWECORE(IDBG_HDL_VAR, "Executing script %s failed\n", script_file);
@@ -444,4 +471,126 @@ int sys_time_commands(IDBG_PARAMS)
     idbg_print(IDBG_HDL_VAR, "time_commands: %s\n", idbgSrv_p->getTimeCommands() ? "true" : "false");
 
     return IDBG_OK;
+}
+
+// ******************************************************************************************************
+// "repeat": executes another shell command over and over again for a given time.
+
+/** a repeat run may not contain another repeat run */
+static const int MAX_REPEAT_NESTING = 1;
+
+int repeat_command(IDBG_PARAMS)
+{
+    char *cmd_s   = IDBG_GET_STRING("-cmd", NULL, ARG_NEEDED);
+    int   seconds = IDBG_GET_INT("-sec", 1, ARG_OPTIONAL);
+    int   throttle = IDBG_GET_INT("-throttle", 0, ARG_OPTIONAL);
+    bool  verbose = IDBG_CHK_FLAG("-verbose");
+    int   count = IDBG_GET_INT("-count", 0, ARG_OPTIONAL);
+
+    if (IDBG_CHK_HELP || IDBG_ARG_ERROR)
+    {
+        IDBG_CMDUSAGE ((p, "-cmd <command> [-sec <seconds>][-count <number>][-verbose][-throttle <usec>]",
+                        "-cmd <command>", "command line to repeat; quote it when it has parameters,",
+                        NULL,             "e.g. -cmd \"info -cpu\"",
+                        "-sec <seconds>", "time to keep repeating the command (default: 1);",
+                        NULL,             "not used when -count is given",
+                        "-count <number>", "number of executions to perform instead of a runtime;",
+                        NULL,              "overrides -sec (default: 0 = end the run by -sec)",
+                        "-verbose",       "print the output of the repeated command",
+                        "-throttle <usec>",    "add a delay between command executions by the given microseconds (default: 0 = no throttle)",
+        				NULL, NULL));
+        return IDBG_OK;
+    }
+
+    if (seconds <= 0)
+    {
+        IDBG_PRINT_ERR(IDBG_HDL_VAR, "-sec must be greater than 0\n");
+        return IDBG_OK;
+    }
+
+    if (count < 0)
+    {
+        IDBG_PRINT_ERR(IDBG_HDL_VAR, "-count must be greater than or equal to 0\n");
+        return IDBG_OK;
+    }
+
+    if (throttle < 0)
+    {
+        IDBG_PRINT_ERR(IDBG_HDL_VAR, "-throttle must be greater than or equal to 0\n");
+        return IDBG_OK;
+    }
+
+    /* A repeat inside a repeat is never what the user wants: the outer run
+     * would count the inner runs instead of the repeated command, so its call
+     * count and rate say nothing, and its runtime would be stretched to the
+     * duration of the inner run. Reject it, also when the inner one is reached
+     * through a script. */
+    struct app_ctx_ *appCtx_p = (struct app_ctx_ *) idbg_get_userdata(IDBG_HDL_VAR);
+    CmdNestingGuard nesting((appCtx_p != NULL) ? &appCtx_p->repeat_nesting : NULL,
+                            MAX_REPEAT_NESTING);
+    if (!nesting.allowed())
+    {
+        IDBG_PRINT_ERR(IDBG_HDL_VAR, "repeat cannot be nested inside another repeat\n");
+        return IDBG_OK;
+    }
+
+    /* The repeated command is dispatched on the same idbg handle, and that
+     * re-uses the handle's argument vector and splits the command line in
+     * place. Everything taken from argv has to be copied into own memory
+     * before the first repetition runs - argv is invalid afterwards. */
+    std::string       command(cmd_s);
+    std::vector<char> line(command.size() + 2U);  // parser needs room behind the string
+
+
+    unsigned long calls        = 0U;
+    int           retval       = IDBG_OK;
+    double        elapsed_ms   = 0.0;
+    const double  duration_ms  = (double)seconds * 1000.0;
+    /* -count ends the run after a number of executions instead of after a
+     * runtime, so that a check can be defined by the work done rather than by
+     * the time it takes. Zero means it was not given and -sec ends the run. */
+    const unsigned long max_calls = (unsigned long)count;
+
+    {
+        // scope guard which drops output of repeated command if -verbose is not given
+        IdbgOutputDrop output_drop(IDBG_HDL_VAR, !verbose);
+
+        bool keep_going = false;
+
+        aweosal_clock_time start_time = aweosal_measure_start();
+        do
+        {
+            memcpy(line.data(), command.c_str(), command.size() + 1U);
+            retval = idbg_parse_cmd(IDBG_HDL_VAR, (unsigned char*)line.data(), (int)line.size());
+            calls++;
+            elapsed_ms = aweosal_measure_elapsed(start_time);
+            keep_going = (max_calls > 0U) ? (calls < max_calls)
+                                         : (elapsed_ms < duration_ms);
+            if ((throttle > 0) && (retval == IDBG_OK) && keep_going)
+            {
+                aweosal_usleep(throttle);
+            }
+        }
+        while ((retval == IDBG_OK) && keep_going);
+    }
+
+    idbg_print(IDBG_HDL_VAR,
+        "repeat:\n"
+        "  command: \"%s\"\n"
+        "  duration_sec: %.6f\n"
+        "  calls: %lu\n"
+        "  calls_per_sec: %.2f\n"
+        ,
+        command.c_str(),
+        elapsed_ms / 1000.0,
+        calls,
+        (elapsed_ms > 0.0) ? (((double)calls * 1000.0) / elapsed_ms) : 0.0
+    );
+
+    if (retval != IDBG_OK)
+    {
+        IDBG_PRINT_ERR(IDBG_HDL_VAR, "error: repeated command stopped the shell (return code %d)\n", retval);
+    }
+
+    return retval;
 }

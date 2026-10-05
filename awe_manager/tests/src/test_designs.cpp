@@ -4,7 +4,7 @@
 /**
 ```yaml
 - id: itest~AWEMGR.Design_And_Preset_Load~1
-  covers: 
+  covers:
     - req~AWEMGR.LoadDesign~1
     - req~AWEMGR.Preset_Selection~1
   description: |
@@ -64,12 +64,13 @@ TEST_F(AweMgrTestFixtureSetGetAWCLoaded, PresetLoad) {
 
 /**
 ```yaml
-- id: itest~AWEMGR.LoadDesign_Fail~1
+- id: itest~AWEMGR.LoadDesign_Fail~2
   covers: req~AWEMGR.LoadDesign~1
   description: |
-    Checks incorrect usage of loading an incorrect design. 
+    Checks incorrect usage of loading an incorrect design.
     Also assumes a case (with "PresetWithAProblem") in which user has a correct AWC
     file format, but forgot to add the AWB data file to the AWC directory.
+    '~2' now checks that the correct error code is returned when the design is not found in the AWC.
 ```
 */
 TEST_F(AweMgrTestFixtureSetGetAWC, LoadDesign_Fail) {
@@ -78,16 +79,17 @@ TEST_F(AweMgrTestFixtureSetGetAWC, LoadDesign_Fail) {
 	ASSERT_TRUE(awectx_p != NULL);
 	EXPECT_EQ(awemgr_load_design(NULL, NULL), awemgr_RC_ERR);
 	EXPECT_EQ(awemgr_load_design(awectx_p, NULL), awemgr_RC_ERR);
-	EXPECT_EQ(awemgr_load_design(awectx_p, "I AM A NON EXISTING DESIGN NAME"), awemgr_RC_ERR);
+	EXPECT_EQ(awemgr_load_design(awectx_p, "I AM A NON EXISTING DESIGN NAME"), awemgr_RC_ERR_DESIGN_NOTFOUND);
 	EXPECT_EQ(awemgr_load_design(awectx_p, "PresetWithAProblem"), awemgr_RC_ERR);
 }
 
 /**
 ```yaml
-- id: itest~AWEMGR.UnloadDesign_Fail~1
+- id: itest~AWEMGR.UnloadDesign_Fail~2
   covers: req~AWEMGR.UnloadDesign~1
   description: |
-    Checks failure cases of unloading the design. 
+    Checks failure cases of unloading the design.
+    '~2' now checks that the correct error code is returned when the design is not found in the AWC.
 ```
 */
 TEST_F(AweMgrTestFixtureSetGetAWC, UnloadDesign_Fail) {
@@ -96,7 +98,7 @@ TEST_F(AweMgrTestFixtureSetGetAWC, UnloadDesign_Fail) {
 	ASSERT_TRUE(awectx_p != NULL);
 	EXPECT_EQ(awemgr_unload_design(NULL, NULL), awemgr_RC_ERR);
 	EXPECT_EQ(awemgr_unload_design(awectx_p, "Main"), awemgr_RC_OK); // No design is loaded, return OK
-	EXPECT_EQ(awemgr_unload_design(awectx_p, ""), awemgr_RC_ERR); // No design is found, return Error
+	EXPECT_EQ(awemgr_unload_design(awectx_p, ""), awemgr_RC_ERR_DESIGN_NOTFOUND); // No design is found, return Error
 }
 
 extern "C"
@@ -121,7 +123,7 @@ TEST_F(PluginParserTest, MaxPluginsBoundary) {
         input += "p" + std::to_string(i) + ".so@0";
         if (i < AWEMGR_MAX_PLUGINS_PER_DESIGN - 1) input += "|";
     }
-    
+
     // Should pass at AWEMGR_MAX_PLUGINS_PER_DESIGN
     EXPECT_EQ(parse_plugin_string(input.c_str(), &design_info), awemgr_RC_OK);
     EXPECT_EQ(design_info.plugin_count, AWEMGR_MAX_PLUGINS_PER_DESIGN);
@@ -136,7 +138,7 @@ TEST_F(PluginParserTest, MaxPluginsBoundary) {
 - id: itest~AWEMGR.PluginInfo.Malformed~1
   covers: req~AWEMGR.PluginInfo~1
   description: |
-    Ensures the parser rejects strings with missing mandatory components (ID separator '@' 
+    Ensures the parser rejects strings with missing mandatory components (ID separator '@'
     or plugin name)
 ```
 */
@@ -151,7 +153,7 @@ TEST_F(PluginParserTest, MalformedStrings) {
 - id: itest~AWEMGR.PluginInfo.NameLen~1
   covers: req~AWEMGR.PluginInfo~1
   description: |
-    Ensures that plugin names up to (AWEMGR_MAX_PLUGIN_NAME_LEN - 1) are accepted 
+    Ensures that plugin names up to (AWEMGR_MAX_PLUGIN_NAME_LEN - 1) are accepted
     and names exceeding the buffer size cause a parse error.
 ```
 */

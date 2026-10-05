@@ -75,5 +75,13 @@ These are the requirements specific to the CMD handling component.
   description: |
     Component requires methods to reset the state of every module and clear layout masks.
 
+- id: dsn~AWEMGR.AWECMD.InitAllocationFailure~1
+  # needs: --- requires a failing allocator; verified by inspection
+  description: |
+    Initialization of a command handle shall report an error to the caller when any of
+    its buffers cannot be allocated, and shall not leave the handle partly initialized.
+    Buffers already allocated shall be released and their pointers cleared, so that a
+    handle from a failed initialization holds no dangling pointer.
+
 
 ```

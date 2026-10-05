@@ -41,6 +41,7 @@ This is the header file of the awe_COMM component/library.
 #define AWE_EVT_RC_FAIL_RESOURCE    -2
 #define AWE_EVT_RC_INVALID_ARG      -3
 #define AWE_EVT_RC_TIMEOUT          -4
+#define AWE_EVT_RC_PROTOCOL_ERR     -5   /* malformed event data (magic word, truncated header or payload) */
 
 
 typedef struct awe_evt_backend {

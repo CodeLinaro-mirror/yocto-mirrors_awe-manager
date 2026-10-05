@@ -88,4 +88,13 @@ if __name__ == "__main__":
 
     ts = TestServers()
     ts.start()
-    ts.stop()
+    # Keep the simulators running until interrupted (Ctrl+C). Without this the
+    # process would start and immediately stop again, so a standalone launch
+    # (e.g. the event-simulator terminal in the manual test setup) served nothing.
+    try:
+        while True:
+            time.sleep(1.0)
+    except KeyboardInterrupt:
+        logger.info("Interrupt received, stopping simulators...")
+    finally:
+        ts.stop()

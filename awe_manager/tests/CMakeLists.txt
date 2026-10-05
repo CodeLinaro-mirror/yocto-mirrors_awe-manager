@@ -50,6 +50,17 @@ target_link_libraries(awe_mgr_test awe_manager gtest gtest_main gmock)
 target_compile_features(awe_mgr_test PRIVATE cxx_std_14)
 target_include_directories(awe_mgr_test PRIVATE ../src)
 
+if(AWEMGR_BUILD_SHELL)
+    target_sources(awe_mgr_test PRIVATE src/test_idbg_output.cpp)
+    target_link_libraries(awe_mgr_test idbg_lib)
+
+    if(TARGET awemgr_shell_lib)
+        target_sources(awe_mgr_test PRIVATE src/test_shell_repeat.cpp)
+        target_sources(awe_mgr_test PRIVATE src/test_shell_nesting.cpp)
+        target_link_libraries(awe_mgr_test awemgr_shell_lib)
+    endif()
+endif()
+
 if(AWEMGR_BUILD_TUNING_SERVER)
     target_sources(awe_mgr_test PRIVATE src/test_tuning_server.cpp)
     target_link_libraries(awe_mgr_test awemgr_tuning_server_lib)

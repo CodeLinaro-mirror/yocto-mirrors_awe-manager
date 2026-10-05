@@ -1,0 +1,47 @@
+#
+# to run this script via AWEMgr-SHell server
+# typical test setup under WSL:
+# - ./build/Linux/debug/awe_manager/apps/service/awemgr_service -awc ./awe_manager/tests/data/designs/stress_testing/target_files/awc_index.txt -shell_socket 15100 -tuning_socket 15092
+# - ./awe_manager/tests/bin/linux_x86-64/LinuxApp -bsize:48
+# - uv run --with pyyaml --with prompt_toolkit awe_manager/apps/awemgr_client/awemgr_client.py
+#   - script -file ./awe_manager/tests/data/designs/stress_testing/throughput-read.idbg.txt
+
+# comment out if you just want to "attach"
+load_design -name Main
+sleep 100
+
+echo ######### set low "CPU-load"
+set_value -var BiquadLoading_Inst0.numStages -values "10"
+set_value -var BiquadLoading_Inst1.numStages -values "10"
+set_value -var BiquadLoading_Inst2.numStages -values "10"
+set_value -var BiquadLoading_Inst3.numStages -values "10"
+
+echo ===== Inst0
+repeat -cmd "get_value -var Sink_Inst0.value" -sec 4
+
+echo ===== Inst1
+repeat -cmd "get_value -var Sink_Inst1.value" -sec 4
+
+echo ===== Inst2
+repeat -cmd "get_value -var Sink_Inst2.value" -sec 4
+
+echo ===== Inst3
+repeat -cmd "get_value -var Sink_Inst3.value" -sec 4
+
+echo ######### set high "CPU-load"
+set_value -var BiquadLoading_Inst0.numStages -values "1000"
+set_value -var BiquadLoading_Inst1.numStages -values "1000"
+set_value -var BiquadLoading_Inst2.numStages -values "1000"
+set_value -var BiquadLoading_Inst3.numStages -values "1000"
+
+echo ===== Inst0
+repeat -cmd "get_value -var Sink_Inst0.value" -sec 4
+
+echo ===== Inst1
+repeat -cmd "get_value -var Sink_Inst1.value" -sec 4
+
+echo ===== Inst2
+repeat -cmd "get_value -var Sink_Inst2.value" -sec 4
+
+echo ===== Inst3
+repeat -cmd "get_value -var Sink_Inst3.value" -sec 4

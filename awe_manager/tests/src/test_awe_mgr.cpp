@@ -339,6 +339,52 @@ TEST_F(AweCOMMTimeoutFixture, timeout)
 
 /**
 ```yaml
+- id: itest~AWEMGR.CommFailErrorCode~1
+  covers: req~AWEMGR.CommFailErrorCode~1
+  description: |
+    Checks that a failed communication with AWECore (no server listening) is reported
+    as awemgr_RC_COMM_FAIL by the API functions, by the instance query used by
+    awemgr_get_target_info() and by the direct transaction path awemgr_transact(),
+    while an invalid argument is still reported as awemgr_RC_ERR.
+```
+*/
+TEST_F(AweMgrMinimalTestFixture, CommFailErrorCode)
+{
+	struct awemgr_data *mgr_p = NULL;
+
+	// nobody listens on this port: init succeeds, the first transaction fails to send
+	awemgr_config_set(cfg_p, "mgr.comm.socket.ip", "127.0.0.1");
+	awemgr_config_set(cfg_p, "mgr.comm.socket.port", "15099");
+	ASSERT_EQ(awemgr_init(&cfg_p, &mgr_p), awemgr_RC_OK);
+
+	// instance query (get_awe_instance_ids -> safe_transact)
+	awemgr_targetinfo info;
+	EXPECT_EQ(awemgr_get_target_info(mgr_p, &info), awemgr_RC_COMM_FAIL);
+
+	// control access (safe_transact)
+	ASSERT_EQ(awemgr_load_awc(mgr_p, TEST_DATA_DIR "/designs/minimal/target_files/awc_index.txt", 0), awemgr_RC_OK);
+	struct awemgr_ctx *ctx_p = awemgr_get_awc_context(mgr_p, 0);
+	ASSERT_TRUE(ctx_p != NULL);
+	unsigned int nr_words_in_buf = 0;
+	awemgr_vartype type = AWEMGR_VARTYPE_FLOAT;
+	UINT32 value = 0;
+	EXPECT_EQ(awemgr_control_read(ctx_p, "Scaler1.gain", (void *)&value, 1, &nr_words_in_buf, &type), awemgr_RC_COMM_FAIL);
+	EXPECT_EQ(awemgr_control_write(ctx_p, "Scaler1.gain", 0, (void *)&value, 1), awemgr_RC_COMM_FAIL);
+
+	// direct transaction path; a minimal valid packet header (length 2 words)
+	UINT32 request[2] = { (2u << 16), 0u };
+	UINT32 response[8] = { 0u };
+	EXPECT_EQ(awemgr_transact(mgr_p, request, 2, response, 8), awemgr_RC_COMM_FAIL);
+
+	// an invalid argument is not a communication failure
+	EXPECT_EQ(awemgr_get_target_info(mgr_p, NULL), awemgr_RC_ERR);
+	EXPECT_EQ(awemgr_transact(NULL, request, 2, response, 8), awemgr_RC_ERR);
+
+	ASSERT_EQ(awemgr_exit(&mgr_p), awemgr_RC_OK);
+}
+
+/**
+```yaml
 - id: itest~AWEMGR.AWECoreErrors~1
   covers: req~AWEMGR.AWECoreErrors~1
   description: When AWE Manager returns error code awemgr_RC_AWECORE_ERROR, APIs awemgr_get_awe_error_code

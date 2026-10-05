@@ -34,6 +34,9 @@
 
 #define FAIL_ON_PTR(x) if (!x) { AWE_COMM_LOGE("Invalid argument: %s == NULL!", #x); return -1; }
 
+/* Maximum length of a resolved trace dump file path (basename + direction suffix). */
+#define TRACE_FILE_PATH_MAX 256
+
 
 /* ****************************************************************************
  * LOCAL TYPES
@@ -64,33 +67,63 @@ static void trace_flag_changed(const char* key, const char* value, const char* d
     AWE_COMM_LOGI("Trace flag changed: %s = %s, do_trace=%d", key, value, this->do_trace);
 }
 
+// helper to open a single direction dump file; builds "<base_name><suffix>" and
+// opens it for binary writing. Returns NULL on error (logged).
+static FILE* trace_open_dump_file(const char* base_name, const char* suffix)
+{
+    char path[TRACE_FILE_PATH_MAX];
+    int written = snprintf(path, sizeof(path), "%s%s", base_name, suffix);
+    if ((written < 0) || ((size_t) written >= sizeof(path)))
+    {
+        AWE_COMM_LOGE("Trace dump file name '%s%s' too long (max %u chars). File write disabled!",
+                      base_name, suffix, (unsigned) (sizeof(path) - 1U));
+        return NULL;
+    }
+
+    AWE_COMM_LOGW("Open file %s for dumping control AWB data...", path);
+    FILE* fp = fopen(path, "wb");
+    if (fp == NULL)
+    {
+        AWE_COMM_LOGE("Error opening trace dump file %s for writing. File write disabled from now on!", path);
+    }
+    return fp;
+}
+
 // callback method to be called when the trace file config is changed;
-// it will open/close the trace file as needed and update the file handle in the trace config struct
+// it will open/close the trace files as needed and update the file handles in the trace config struct.
+// TX and RX traffic is dumped into separate files, each derived from the configured basename.
 static void trace_file_changed(const char* key, const char* value, const char* description, void* context)
 {
     struct awecomm_trace* this = (struct awecomm_trace*) context;
 
     const char* file_name = aweconfig_get(this->cfg_p, CFG_COMM_TRACE_FILE, NULL);
 
-    /* if the file name in the config is not "none" and the file handle is NULL,
-       then open the file and update the file handle;
-       if the file name is "none" now and the file handle is not NULL,
-       then close the file and set the file handle to NULL.
+    /* in any case, if there was a file open for dumping, close it and reset the file handles,
+       handle each file separately since one may be open while the other is not (can only happen because of a
+       file system error, but we want to be robust and handle it gracefully).
      */
-    if ((strcmp(file_name, CFG_COMM_TRACE_FILE_NONE) != 0) && this->comm_tx_fp == NULL)
+    if ((this->comm_tx_fp != NULL) || (this->comm_rx_fp != NULL))
     {
-        AWE_COMM_LOGW("Open file %s for dumping TX control AWB data...", file_name);
-        this->comm_tx_fp = fopen(file_name, "wb");
-        if (this->comm_tx_fp == NULL)
+        AWE_COMM_LOGW("Close dump files");
+        if (this->comm_tx_fp != NULL)
         {
-            AWE_COMM_LOGE("Error opening trace dump file %s for writing. File write disabled from now on!", file_name);
+            fclose(this->comm_tx_fp);
+            this->comm_tx_fp = NULL;
+        }
+        if (this->comm_rx_fp != NULL)
+        {
+            fclose(this->comm_rx_fp);
+            this->comm_rx_fp = NULL;
         }
     }
-    else if ((strcmp(file_name, CFG_COMM_TRACE_FILE_NONE) == 0) && this->comm_tx_fp != NULL)
+
+    /* if the file name in the config is not "none",
+       then open the TX and RX dump files and update the file handles;
+    */
+    if (strcmp(file_name, CFG_COMM_TRACE_FILE_NONE) != 0)
     {
-        AWE_COMM_LOGW("Close dump file");
-        fclose(this->comm_tx_fp);
-        this->comm_tx_fp = NULL;
+        this->comm_tx_fp = trace_open_dump_file(file_name, CFG_COMM_TRACE_FILE_TX_SUFFIX);
+        this->comm_rx_fp = trace_open_dump_file(file_name, CFG_COMM_TRACE_FILE_RX_SUFFIX);
     }
 
     AWE_COMM_LOGI("Trace file config changed: %s = %s", key, value);
@@ -105,7 +138,7 @@ int awecomm_trace_register_configs(awe_config* cfg_p)
 {
     aweconfig_init_tuple common_configs [] = {
         {CFG_COMM_TRACE_STATE, CFG_COMM_TRACE_STATE_VAL_DEFAULT, "Trace control data (on/off)", NULL, NULL},
-        {CFG_COMM_TRACE_FILE, CFG_COMM_TRACE_FILE_VAL_DEFAULT, "Name of file to dump binary TX control data ('~' for no dump or file path)", NULL, NULL},
+        {CFG_COMM_TRACE_FILE, CFG_COMM_TRACE_FILE_VAL_DEFAULT, "Basename to dump binary control data ('~' for no dump); TX -> '<name>.tx', RX -> '<name>.rx'", NULL, NULL},
     };
 
     int rc = aweconfig_add_multiple(cfg_p, common_configs, sizeof(common_configs)/sizeof(common_configs[0]));
@@ -118,6 +151,7 @@ int awecomm_trace_init(struct awecomm_trace *trace_cfg_p, awe_config* cfg_p)
     FAIL_ON_PTR(trace_cfg_p);
     trace_cfg_p->cfg_p = cfg_p;
     trace_cfg_p->comm_tx_fp = NULL;
+    trace_cfg_p->comm_rx_fp = NULL;
 
     trace_cfg_p->observer_cb_mutex = awosal_create_mutex();
     if (trace_cfg_p->observer_cb_mutex == NULL)
@@ -146,7 +180,7 @@ int awecomm_trace_exit(struct awecomm_trace *trace_cfg_p)
     return 0;
 }
 
-int awecomm_trace_dump(struct awecomm_trace *trace_cfg_p, int chn, const char *direction, FILE *fp, void* data, int data_sz_words)
+int awecomm_trace_dump(struct awecomm_trace *trace_cfg_p, int chn, const char *direction, void* data, int data_sz_words)
 {
     FAIL_ON_PTR(trace_cfg_p);
 
@@ -168,11 +202,25 @@ int awecomm_trace_dump(struct awecomm_trace *trace_cfg_p, int chn, const char *d
         trace_cfg_p->observer_cb_mutex->unlock(trace_cfg_p->observer_cb_mutex);
 
     }
-    // check if dumping to file is enabled
-    if (trace_cfg_p->comm_tx_fp)
+    // select the dump file matching the transfer direction (TX/RX go to separate files)
+    FILE* out_fp = NULL;
+    if (direction != NULL)
+    {
+        if (strcmp(direction, "TX") == 0)
+        {
+            out_fp = trace_cfg_p->comm_tx_fp;
+        }
+        else if (strcmp(direction, "RX") == 0)
+        {
+            out_fp = trace_cfg_p->comm_rx_fp;
+        }
+    }
+
+    // check if dumping to file is enabled for this direction
+    if (out_fp)
     {
         int nr_words_to_write = AWECMD_MSG_NO_CRC_LENGTH(data);
-        fwrite(data, nr_words_to_write, sizeof(unsigned int), trace_cfg_p->comm_tx_fp);
+        fwrite(data, sizeof(unsigned int), nr_words_to_write, out_fp);
     }
     return 0;
 }
@@ -201,6 +249,10 @@ int awecomm_trace_finalize(struct awecomm_trace *trace_cfg_p)
     if (trace_cfg_p->comm_tx_fp) {
         fclose(trace_cfg_p->comm_tx_fp);
         trace_cfg_p->comm_tx_fp = NULL;
+    }
+    if (trace_cfg_p->comm_rx_fp) {
+        fclose(trace_cfg_p->comm_rx_fp);
+        trace_cfg_p->comm_rx_fp = NULL;
     }
     return 0;
 }

@@ -242,15 +242,7 @@ enum awemgr_rc  awemgr_events_process_next(struct awemgr_ctx *ctx_p, uint32_t ti
     AWEMGR_FAIL_ON_HANDLE_NULL(ctx_p);
     int rc = aweevent_read(ctx_p->parent->event_data, timeoutMs);
 
-    if(rc != AWECOMM_RC_OK)
-    {
-        if(rc == AWECOMM_RC_TIMEOUT)
-        {
-            return awemgr_RC_COMM_TIMEOUT;
-        }
-        return awemgr_RC_ERR;
-    }
-    return awemgr_RC_OK;
+    return awemgr_comm_rc_to_mgr_rc(rc);
 }
 
 

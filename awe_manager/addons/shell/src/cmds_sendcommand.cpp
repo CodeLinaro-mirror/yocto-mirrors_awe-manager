@@ -60,14 +60,15 @@ int handle_sendcommand (IDBG_PARAMS)
         return IDBG_OK;
     }
 
-    // get tuning buffer size and allocate memory here
-    // default value, should be overwritten by config value; note:
-    // this is the total buffer size, including header, so actual payload buffer size is smaller by 4 words (16 bytes)
-    uint32_t tuning_buffer_size = 264;
+    // The tuning buffer size is provided by the manager config; there is no
+    // local default here. It is the total buffer size (including header), so the
+    // usable payload is 4 words (16 bytes) smaller.
+    uint32_t tuning_buffer_size = 0U; // must be filled from config below (or we bail out)
 
-    if (aweconfig_get_as_uint(appCtx_p->cfg_p, "mgr.comm.buffersize", &tuning_buffer_size) != AWECFG_RC_OK)
+    if (aweconfig_get_as_uint(appCtx_p->cfg_p, "mgr.comm.buffersize", &tuning_buffer_size) != AWECFG_RC_OK
+        || tuning_buffer_size <= 4U)
     {
-        IDBG_PRINT_ERR(IDBG_HDL_VAR, "Failed to get tuning buffer size from config. Check %s\n", "mgr.comm.buffersize");
+        IDBG_PRINT_ERR(IDBG_HDL_VAR, "Invalid or missing tuning buffer size from config. Check %s\n", "mgr.comm.buffersize");
         return IDBG_OK;
     }
 
@@ -123,7 +124,7 @@ int handle_sendcommand (IDBG_PARAMS)
 
     unsigned int nr_words_received;
     enum awemgr_rc rc = awemgr_send_command(awc_ctx_p, cmdId, coreId, payload, payload_size,
-                                            response_buffer, sizeof(response_buffer), &nr_words_received);
+                                            response_buffer, max_payload_size_in_words, &nr_words_received);
     if (rc != awemgr_RC_OK) {
         IDBG_PRINT_ERR_AWECORE(IDBG_HDL_VAR, "Sending command (cmd = %d) failed.\n", cmdId);
     }

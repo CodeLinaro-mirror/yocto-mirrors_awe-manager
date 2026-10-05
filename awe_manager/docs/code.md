@@ -54,6 +54,7 @@ A *design* is a compiled signal flow, aka, AWB file. The AWC file contains the i
 | [`awemgr_skip_unload_design_on_exit()`](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_skip_unload_design_on_exit) | Mark a context so the design is NOT unloaded on [`awemgr_exit()`](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_exit) (detach mode) |
 | [`awemgr_get_design_count()`](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_get_design_count) | Number of designs available in the loaded AWC |
 | [`awemgr_get_design_info()`](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_get_design_info) | Name and metadata for a design by index |
+| [`awemgr_get_design_info_by_name()`](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_get_design_info_by_name) | Metadata for a design by name; reports `awemgr_RC_ERR_DESIGN_NOTFOUND` if unknown |
 
 ---
 
@@ -154,3 +155,20 @@ tooling or testing that needs to bypass the high-level API.
 | [`awemgr_send_command()`](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_send_command) | Send a pre-built AWE tuning command to the BSP. |
 | [`awemgr_transact()`](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_transact) | Send a raw word buffer and receive a raw response |
 | [`awemgr_set_comm_trace_tap()`](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_set_comm_trace_tap) | Install a callback that receives raw TX/RX buffers for every transaction |
+
+---
+
+### Error codes
+
+All functions returning `enum awemgr_rc` report one of these codes. AWE-Manager does not
+retry or reconnect on a communication error; the recovery policy is left to the client.
+
+| Code | Value | Meaning |
+|------|-------|---------|
+| `awemgr_RC_OK` | 0 | Success |
+| `awemgr_RC_ERR` | -1 | Generic error, e.g. an invalid argument or a malformed response |
+| `awemgr_RC_COMM_TIMEOUT` | -2 | No response from AWECore within `mgr.comm.timeoutms` |
+| `awemgr_RC_AWECORE_ERROR` | -3 | AWECore returned an error; see [`awemgr_get_awe_error()`](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_get_awe_error) |
+| `awemgr_RC_ERR_INVALID_VAL` | -4 | A value for `awemgr_control_write()` is outside the allowed range |
+| `awemgr_RC_ERR_DESIGN_NOTFOUND` | -5 | The design name is not found in the AWC |
+| `awemgr_RC_COMM_FAIL` | -6 | The communication with AWECore failed: connection not available or lost, send or receive error |

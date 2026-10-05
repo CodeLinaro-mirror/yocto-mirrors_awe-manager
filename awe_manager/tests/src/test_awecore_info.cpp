@@ -136,3 +136,72 @@ TEST_F(AweMgrTestFixtureSetGetAWCLoaded, AweCoreInfoFails) {
 	ASSERT_EQ(awemgr_get_cpu_info(m_mgr_p, 0, 0, NULL), awemgr_RC_ERR);
 }
 
+/**
+```yaml
+- id: itest~AWEMGR.AweCoreInfo.EndpointOutOfRange~1
+  covers: req~AWEMGR.ApiArgumentValidation~1
+  description: Checks that an endpoint index outside the supported range is
+    rejected by the info queries. An index of -1 - as seen when no AWC is
+    loaded - previously corrupted the message header and crashed.
+```
+*/
+TEST_F(AweMgrTestFixture, AweCoreInfoEndpointOutOfRange) {
+	awemgr_heapinfo heaps;
+	awemgr_modulelist_info modulelist;
+	awemgr_cpuinfo cpuinfo;
+	awemgr_layoutinfo layoutinfo;
+
+	const int bad_endpoints[] = { -1, MAX_AWE_ENDPOINTS, MAX_AWE_ENDPOINTS + 1, 9999 };
+
+	for (int endpoint : bad_endpoints)
+	{
+		EXPECT_EQ(awemgr_get_cpu_info(m_mgr_p, endpoint, 0, &cpuinfo), awemgr_RC_ERR) << "endpoint " << endpoint;
+		EXPECT_EQ(awemgr_get_layout_info(m_mgr_p, endpoint, 0, &layoutinfo), awemgr_RC_ERR) << "endpoint " << endpoint;
+		EXPECT_EQ(awemgr_get_heap_info(m_mgr_p, endpoint, 0, &heaps), awemgr_RC_ERR) << "endpoint " << endpoint;
+		EXPECT_EQ(awemgr_get_modulelist_info(m_mgr_p, endpoint, 0, &modulelist), awemgr_RC_ERR) << "endpoint " << endpoint;
+	}
+}
+
+/**
+```yaml
+- id: itest~AWEMGR.AweCoreInfo.CoreOutOfRange~1
+  covers: req~AWEMGR.ApiArgumentValidation~1
+  description: Checks that a core index outside the supported range is rejected
+    by the info queries; the core index shares the message header byte with the
+    endpoint index and corrupts it the same way.
+```
+*/
+TEST_F(AweMgrTestFixture, AweCoreInfoCoreOutOfRange) {
+	awemgr_heapinfo heaps;
+	awemgr_modulelist_info modulelist;
+	awemgr_cpuinfo cpuinfo;
+	awemgr_layoutinfo layoutinfo;
+
+	const int bad_cores[] = { -1, MAX_AWE_CORES, MAX_AWE_CORES + 1, 9999 };
+
+	for (int core : bad_cores)
+	{
+		EXPECT_EQ(awemgr_get_cpu_info(m_mgr_p, 0, core, &cpuinfo), awemgr_RC_ERR) << "core " << core;
+		EXPECT_EQ(awemgr_get_layout_info(m_mgr_p, 0, core, &layoutinfo), awemgr_RC_ERR) << "core " << core;
+		EXPECT_EQ(awemgr_get_heap_info(m_mgr_p, 0, core, &heaps), awemgr_RC_ERR) << "core " << core;
+		EXPECT_EQ(awemgr_get_modulelist_info(m_mgr_p, 0, core, &modulelist), awemgr_RC_ERR) << "core " << core;
+	}
+}
+
+/**
+```yaml
+- id: itest~AWEMGR.Awc.EndpointOutOfRange~1
+  covers: req~AWEMGR.ApiArgumentValidation~1
+  description: Checks that AWC load/unload reject an endpoint index outside the
+    supported range.
+```
+*/
+TEST_F(AweMgrTestFixture, AwcEndpointOutOfRange) {
+	EXPECT_EQ(awemgr_load_awc(m_mgr_p, awc_file, -1), awemgr_RC_ERR);
+	EXPECT_EQ(awemgr_load_awc(m_mgr_p, awc_file, MAX_AWE_ENDPOINTS), awemgr_RC_ERR);
+	EXPECT_EQ(awemgr_unload_awc(m_mgr_p, -1), awemgr_RC_ERR);
+	EXPECT_EQ(awemgr_unload_awc(m_mgr_p, MAX_AWE_ENDPOINTS), awemgr_RC_ERR);
+	EXPECT_TRUE(awemgr_get_awc_context(m_mgr_p, -1) == NULL);
+	EXPECT_TRUE(awemgr_get_awc_context(m_mgr_p, MAX_AWE_ENDPOINTS) == NULL);
+}
+

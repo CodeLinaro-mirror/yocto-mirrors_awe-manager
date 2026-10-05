@@ -47,6 +47,8 @@ Those have been added on top of the (customer) `feat` items above.
       - [AWE AWC: Requirements][awe-awc-requirements]
       - [AWE CMD: Requirements][awe-cmd-requirements]
       - [AWE COMM: Requirements][awe-comm-requirements]
+      - [AWE CONFIG: Requirements][awe-config-requirements]
+      - [AWE OSAL: Requirements][awe-osal-requirements]
 
     As mentioned above, the requirements on this page as well as all of these sub-component requirements,
     together with the test cases and other "specification objects" are retrieved from code to generate the traceability report.
@@ -147,6 +149,15 @@ Those have been added on top of the (customer) `feat` items above.
     The list of designs contains the "boot" or "main" AWB, as well as the preset AWBs.
     The design info must also contain the list of the plugins required to load this design.
 
+- id: req~AWEMGR.DesignLookupByName~1
+  needs: itest
+  description: |
+    Besides the index based enumeration, it shall be possible to query the information
+    of a single design by its name, so that an application knowing the name does not
+    have to iterate over all designs. The name shall be resolved as it is for loading a
+    design, and a name that is not known in the AWC shall be reported as such, so that
+    the call can be used to check whether a design exists.
+
 - id: req~AWEMGR.Sleep~1
   needs: itest
   description: |
@@ -166,6 +177,16 @@ Those have been added on top of the (customer) `feat` items above.
   needs: itest
   description: |
     It shall be possible to query the AWECore error code and corresponding error string.
+
+- id: req~AWEMGR.CommFailErrorCode~1
+  needs: itest
+  description: |
+    A failed communication with AWECore (connection not available or lost, send or receive
+    error) shall be reported with its own error code awemgr_RC_COMM_FAIL, distinct from a
+    communication timeout, an AWECore error and the generic error code. A malformed response or
+    malformed event data is not a failed communication and shall be reported with the generic
+    error code. AWE-Manager shall not perform any recovery on such a failure; this is left to
+    the client.
 
 - id: req~AWEMGR.SupressionAWECoreReturnValues~1
   needs: itest
@@ -194,6 +215,14 @@ Those have been added on top of the (customer) `feat` items above.
   needs: itest
   description: |
     It shall be possible to query information from AWE Core, like CPU, memory, modules and layout profiling info.
+
+- id: req~AWEMGR.ApiArgumentValidation~1
+  needs: itest
+  description: |
+    API functions taking an endpoint or core index shall reject an index outside the
+    supported range (0 to MAX_AWE_ENDPOINTS-1 respectively 0 to MAX_AWE_CORES-1) and
+    report an error to the caller. Both indices are encoded in the tuning message
+    header, so an out of range index shall not be passed on to message construction.
 
 - id: req~AWEMGR.SubcanvasLoadUnloadDesign~1
   needs: itest

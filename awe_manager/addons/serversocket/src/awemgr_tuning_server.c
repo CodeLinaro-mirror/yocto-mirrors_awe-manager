@@ -210,7 +210,7 @@ static void serve_client(struct awemgr_tuning_server *srv)
             req_buf, (int)len_words,
             rsp_buf, (int)srv->buf_words);
 
-        if (rc == awemgr_RC_COMM_TIMEOUT || rc == awemgr_RC_ERR)
+        if (rc == awemgr_RC_COMM_TIMEOUT || rc == awemgr_RC_COMM_FAIL || rc == awemgr_RC_ERR)
         {
             /* Communication failure — no usable response to forward. */
             fprintf(stderr, "awemgr_tuning_server: awemgr_transact failed (%d), "

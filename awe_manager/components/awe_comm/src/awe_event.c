@@ -159,8 +159,12 @@ int aweevent_read(aweevent_data *evnt_p, uint32_t timeoutMs)
             ev_rc = AWECOMM_RC_FAIL_COMM;
             break;
         }
-        case AWE_EVT_RC_INVALID_ARG:
-            ev_rc = AWECOMM_RC_FAIL_COMM;
+        case AWE_EVT_RC_INVALID_ARG:   // an invalid argument or malformed event data
+        case AWE_EVT_RC_PROTOCOL_ERR:  // is not a failed communication
+            ev_rc = AWECOMM_RC_FAIL_PARAM;
+            break;
+        case AWE_EVT_RC_FAIL_RESOURCE:
+            ev_rc = AWECOMM_RC_FAIL_RESOURCES;
             break;
         case AWE_EVT_RC_TIMEOUT:
             ev_rc = AWECOMM_RC_TIMEOUT;

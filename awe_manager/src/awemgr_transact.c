@@ -49,14 +49,6 @@ enum awemgr_rc  awemgr_transact(struct awemgr_data* mgr_p, void* request_buffer,
 
     (void) awecomm_release_lock(mgr_p->comm_2_awe);
 
-    if(comm_rc != AWECOMM_RC_OK)
-    {
-        if(comm_rc == AWECOMM_RC_TIMEOUT)
-        {
-            return awemgr_RC_COMM_TIMEOUT;
-        }
-        return awemgr_RC_ERR;
-    }
-    return awemgr_RC_OK;
+    return awemgr_comm_rc_to_mgr_rc(comm_rc);
 
 }

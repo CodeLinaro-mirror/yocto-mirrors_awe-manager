@@ -116,6 +116,7 @@ IDBG_TBL_START(ShellMenuMain)
     IDBG_TBL_CMD(user_data_info,    "user_data",    "Show data attached to modules/controls by system integrator")
 
     IDBG_TBL_CMD(script,            "script",       "Load and execute another script file")
+    IDBG_TBL_CMD(repeat_command,    "repeat",       "Repeats another command for a given time and counts the executions")
 IDBG_TBL_END
 
 

@@ -49,6 +49,10 @@ if(AWEMGR_TESTS_COVERAGE)
             "${PROJECT_SOURCE_DIR}/${PROJECT_NAME}/components/awe_osal/example/*"
             "${PROJECT_SOURCE_DIR}/${PROJECT_NAME}/components/awe_osal/tests/*"
             "${PROJECT_SOURCE_DIR}/${PROJECT_NAME}/tests/*"
+            # third party code bundled with the idbg addon (isocline); it is not
+            # ours to test and its ~4500 never executed lines would dominate the
+            # reported coverage rate
+            "${PROJECT_SOURCE_DIR}/${PROJECT_NAME}/addons/idbg/external/*"
         )
 
         add_custom_command(

@@ -86,10 +86,10 @@ UINT32 ComputeCRC(UINT32 *pMessage, UINT32 len);
 #define PFID_BSPCmd                             200
 
 // "borrow" from AWECoreUtils.h
-#define PACKET_LENGTH_WORDS(x) (x[0]>>16)
-#define PACKET_LENGTH_BYTES(x) ((x[0]>>16) * sizeof(x[0]))
-#define PACKET_INSTANCEID(x) (x[0] >> 8) & 0xff
-#define PACKET_OPCODE(x) ((INT32)x[0] & 0xffU)
+#define PACKET_LENGTH_WORDS(x) ((x)[0] >> 16)
+#define PACKET_LENGTH_BYTES(x) (((x)[0] >> 16) * sizeof((x)[0]))
+#define PACKET_INSTANCEID(x) (((x)[0] >> 8) & 0xff)
+#define PACKET_OPCODE(x) ((INT32)(x)[0] & 0xffU)
 
 
 /* ****************************************************************************
@@ -149,6 +149,16 @@ int awecmd_init(struct awecmd_st *ctx_p, UINT32 nr_words, bool isCircularBuffer,
     awecmd_reset(ctx_p, 0);
 
     ctx_p->response_buffer_p = calloc(nr_words_response, sizeof(UINT32));
+    if (ctx_p->response_buffer_p == NULL)
+    {
+        // release the request buffer allocated above, so the caller is not left
+        // with a half-initialized context it cannot clean up
+        free(ctx_p->buffer_p);
+        ctx_p->buffer_p = NULL;
+        ctx_p->wraparound_p = NULL;
+        ctx_p->current_p = NULL;
+        return AWECMD_RC_ERR;
+    }
     ctx_p->response_buffer_end_p = ctx_p->response_buffer_p + nr_words_response;
     ctx_p->response_buffer_size = nr_words_response;
 
