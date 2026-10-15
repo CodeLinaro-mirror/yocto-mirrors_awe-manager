@@ -397,7 +397,9 @@ TEST_F(AweMgrTestEvents, TimeOut)
 /**
 ```yaml
 - id: itest~AWEMGR.Events.ErrorProtocol_IncorrectMagicW~1
-  covers: req~AWEMGR.Event_Notification~1
+  covers:
+    - req~AWEMGR.Event_Notification~1
+    - req~AWEMGR.CommFailErrorCode~1
   description: Reading from a socket, we do not get the right magic word.
 ```
 */
@@ -420,7 +422,9 @@ TEST_F(AweMgrTestEvents, ErrorProtocol_IncorrectMagicW)
 /**
 ```yaml
 - id: itest~AWEMGR.Events.ErrorProtocol_IncorrectEventHdr~1
-  covers: req~AWEMGR.Event_Notification~1
+  covers:
+    - req~AWEMGR.Event_Notification~1
+    - req~AWEMGR.CommFailErrorCode~1
   description: When reading from socket, there is no suitable/enough data for an event header.
 ```
 */
@@ -443,7 +447,9 @@ TEST_F(AweMgrTestEvents, ErrorProtocol_IncorrectEventHdr)
 /**
 ```yaml
 - id: itest~AWEMGR.Events.ErrorProtocol_IncorrectPayload~1
-  covers: req~AWEMGR.Event_Notification~1
+  covers:
+    - req~AWEMGR.Event_Notification~1
+    - req~AWEMGR.CommFailErrorCode~1
   description: When reading from socket, there is just enough data for the header, but not for the payload.
 ```
 */
@@ -467,7 +473,9 @@ TEST_F(AweMgrTestEvents, ErrorProtocol_IncorrectPayload)
 /**
 ```yaml
 - id: itest~AWEMGR.Events.ErrorProtocol_PayloadResize~1
-  covers: req~AWEMGR.Event_Notification~1
+  covers:
+    - req~AWEMGR.Event_Notification~1
+    - req~AWEMGR.CommFailErrorCode~1
   description: When reading from socket, we receive a bigger payload size than expected
                and we need to resize the internal buffer.
 ```

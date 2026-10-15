@@ -258,8 +258,8 @@ static int socket_read(awe_comm_backend* bkend, void* target_buffer, int target_
     *nr_words_read = ret / sizeof(unsigned int);
     if (ret % sizeof(unsigned int) != 0)
     {
-        AWE_COMM_LOGE("Received data size %d is not a multiple of word size! Communication with AWECore failed", ret);
-        return AWECOMM_RC_FAIL_COMM;
+        AWE_COMM_LOGE("Received data size %d is not a multiple of word size! Invalid response from AWECore", ret);
+        return AWECOMM_RC_FAIL_PARAM;   // a malformed response, not a failed connection
     }
 
     return AWECOMM_RC_OK;

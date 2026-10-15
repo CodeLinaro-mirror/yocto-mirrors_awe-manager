@@ -106,6 +106,8 @@ static enum awemgr_rc get_shared_heap(struct awemgr_data* mgr_p, unsigned int en
 {
     AWEMGR_FAIL_ON_HANDLE_NULL(mgr_p);
     AWEMGR_FAIL_ON_HANDLE_NULL(info_buffer_p);
+    AWEMGR_FAIL_ON_ENDPOINT_INVALID(endpointId);
+    AWEMGR_FAIL_ON_CORE_INVALID(coreId);
 
     enum awemgr_rc rc;
 

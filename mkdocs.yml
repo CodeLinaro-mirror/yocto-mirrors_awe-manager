@@ -44,6 +44,9 @@ nav:
     - code.md
     - "awe_manager.h": AweMgrHdrDocs/awe__manager_8h.md
 
+  - Usage Tips:
+    - "AWE Manager Shell": usage/usage_awemgr_shell.md
+
 not_in_nav: |
     AweMgrHdrDocs/*.md
 

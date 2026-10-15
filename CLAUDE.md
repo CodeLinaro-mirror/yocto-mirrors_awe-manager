@@ -36,7 +36,7 @@ python -m awe_manager.tests.run_ctest_with_aweserver --cwd build/Linux/testing r
 
 # Manual setup (three terminals)
 ./awe_manager/tests/bin/linux_x86-64/LinuxApp -bsize:48          # Terminal 1
-python -m awe_manager.tests.event_socket_simulator                # Terminal 2
+python -m awe_manager.tests.event_socket_simulator                # Terminal 2 (Ctrl+C to stop)
 cd build/Linux/testing && ctest                                   # Terminal 3
 
 # Single test

@@ -278,6 +278,12 @@ int target_info(IDBG_PARAMS)
 {
     struct app_ctx_ *appCtx_p = (struct app_ctx_ *) idbg_get_userdata(IDBG_HDL_VAR);
 
+    /* Collect all output of this command and emit it as one block: the sub
+     * commands below issue several API calls, and with comm tracing enabled
+     * the trace output would otherwise be interleaved with - and thereby
+     * break - the YAML document printed here. */
+    IdbgOutputHold output_hold(IDBG_HDL_VAR);
+
     bool info_classes = IDBG_CHK_FLAG("-classes");
     bool info_cpuload = IDBG_CHK_FLAG("-cpu");
     bool info_mem = IDBG_CHK_FLAG("-mem");
@@ -302,6 +308,16 @@ int target_info(IDBG_PARAMS)
     endpoint = (endpoint >= 0) ? endpoint : appCtx_p->endpointId;
     int effectiveCoreId = (coreId >= 0) ? coreId : 0;
 
+    /* Without a loaded AWC the session has no endpoint selected (-1); the
+     * queries below must not be issued with such an endpoint index. */
+    if (endpoint < 0 || endpoint >= awemgr_get_max_awcs())
+    {
+        IDBG_PRINT_ERR(IDBG_HDL_VAR,
+                       "no endpoint selected: load an AWC or pass -endpoint <index> (0 to %d)\n",
+                       awemgr_get_max_awcs() - 1);
+        return IDBG_OK;
+    }
+
     if (info_classes) {
         target_info_classlist(IDBG_HDL_VAR, appCtx_p->mgr_p, endpoint, effectiveCoreId);
     }
@@ -312,7 +328,7 @@ int target_info(IDBG_PARAMS)
 
     if (info_cpuload) {
         if (!explicit_target)
-            target_info_cpuload_all(IDBG_HDL_VAR, appCtx_p->mgr_p, appCtx_p->endpointId);
+            target_info_cpuload_all(IDBG_HDL_VAR, appCtx_p->mgr_p, endpoint);
         else
             target_info_cpuload(IDBG_HDL_VAR, appCtx_p->mgr_p, endpoint, effectiveCoreId);
     }

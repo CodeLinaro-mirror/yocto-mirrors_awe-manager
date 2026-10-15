@@ -135,7 +135,7 @@ enum awemgr_rc awemgr_load_design(struct awemgr_ctx *ctx_p, const char *designNa
     if (pDesign == NULL)
     {
         AWEMGR_API_LOGE("Could not find design in AWC: %s", designName);
-        return awemgr_RC_ERR;
+        return awemgr_RC_ERR_DESIGN_NOTFOUND;
     }
 
     //uint8_t reserved = (ctx_p->pDesign->coreid_objectid >> 24) & 0xff;
@@ -213,7 +213,7 @@ enum awemgr_rc awemgr_unload_design(struct awemgr_ctx *ctx_p, const char *design
         if (pDesign == NULL)
         {
             AWEMGR_API_LOGE("Could not find design in AWC: %s", designName);
-            return awemgr_RC_ERR;
+            return awemgr_RC_ERR_DESIGN_NOTFOUND;
         }
     }
 
@@ -245,6 +245,27 @@ enum awemgr_rc awemgr_unload_design(struct awemgr_ctx *ctx_p, const char *design
 }
 
 
+/* Fills the caller's structure from an AWC design entry. Shared by the index and
+   the name based getter, so both report exactly the same information. */
+static enum awemgr_rc fill_design_info(struct awemgr_ctx *ctx_p, const awc_design_t *design_p, struct awemgr_design_info *info)
+{
+    info->name = design_p->name;
+    info->coreid_objectid = design_p->coreid_objectid;
+    info->size = design_p->size;
+    info->md5sum = design_p->md5sum;
+    info->plugin_count = 0;
+    memset(info->plugins, 0, sizeof(info->plugins));
+    // check if this design is connected to a list of plugin libraries to load
+    const awc_dict_element *pluginlist_info_p = awc_get_top_userdata_by_key(ctx_p->awc, info->name);
+    if (pluginlist_info_p != NULL)
+    {
+        AWEMGR_API_LOGI("Design %s requires plugins: %s", info->name, pluginlist_info_p->value.str);
+        return parse_plugin_string(pluginlist_info_p->value.str, info);
+    }
+
+    return awemgr_RC_OK;
+}
+
 enum awemgr_rc  awemgr_get_design_info(struct awemgr_ctx *ctx_p, int index, struct awemgr_design_info *info)
 {
     AWEMGR_FAIL_ON_HANDLE_NULL(ctx_p);
@@ -257,21 +278,25 @@ enum awemgr_rc  awemgr_get_design_info(struct awemgr_ctx *ctx_p, int index, stru
         return awemgr_RC_ERR;
     }
 
-    info->name = design_p->name;
-    info->coreid_objectid = design_p->coreid_objectid;
-    info->size = design_p->size;
-    info->md5sum = design_p->md5sum;
-    info->plugin_count = 0;
-    // check if this design is connected to a list of plugin libraries to load
-    const awc_dict_element *pluginlist_info_p = awc_get_top_userdata_by_key(ctx_p->awc, info->name);
-    if (pluginlist_info_p != NULL)
+    return fill_design_info(ctx_p, design_p, info);
+}
+
+enum awemgr_rc  awemgr_get_design_info_by_name(struct awemgr_ctx *ctx_p, const char *design_name, struct awemgr_design_info *info)
+{
+    AWEMGR_FAIL_ON_HANDLE_NULL(ctx_p);
+    AWEMGR_FAIL_ON_HANDLE_NULL(design_name);
+    AWEMGR_FAIL_ON_HANDLE_NULL(info);
+
+    // same lookup as used by awemgr_load_design(), so a name accepted there is
+    // accepted here and both report awemgr_RC_ERR_DESIGN_NOTFOUND alike
+    awc_design_t *design_p = awc_get_design(ctx_p->awc, design_name);
+    if(design_p == NULL)
     {
-        AWEMGR_API_LOGI("Design %s requires plugins: %s", info->name, pluginlist_info_p->value.str);
-        memset(info->plugins, 0, sizeof(info->plugins));
-        return parse_plugin_string(pluginlist_info_p->value.str, info);
+        AWEMGR_API_LOGE("Could not find design in AWC: %s", design_name);
+        return awemgr_RC_ERR_DESIGN_NOTFOUND;
     }
 
-    return awemgr_RC_OK;
+    return fill_design_info(ctx_p, design_p, info);
 }
 
 enum awemgr_rc awemgr_skip_unload_design_on_exit(struct awemgr_ctx *ctx_p)

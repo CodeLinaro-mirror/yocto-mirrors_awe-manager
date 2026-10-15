@@ -37,6 +37,13 @@
 #define CFG_COMM_SOCKET_RECONNECT_INTERVAL_MS     "mgr.comm.socket.reconnect_interval_ms"
 #define DEFAULT_COMM_SOCKET_RECONNECT_INTERVAL_MS "1000"
 
+/* Default tuning/communication packet buffer size in 32-bit words.
+   Serves both as the registered default for CFG_COMM_BUFFER_SIZE and as the
+   runtime fallback (see awecomm_init) when the key cannot be read. The value
+   depends on the selected AWECore connection backend. */
+#define CFG_COMM_BUFFER_SIZE_DEFAULT    264
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif

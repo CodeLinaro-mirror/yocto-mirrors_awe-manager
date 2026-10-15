@@ -40,6 +40,13 @@
 #define CFG_COMM_TRACE_FILE               "mgr.comm.trace.file"
 #define CFG_COMM_TRACE_FILE_VAL_DEFAULT   CFG_COMM_TRACE_FILE_NONE
 
+/* The configured file name is treated as a basename: TX and RX traffic is
+   dumped into separate files, each built by appending the direction suffix
+   to the configured basename (e.g. basename "trace.awb" -> "trace.awb.tx" and
+   "trace.awb.rx"). */
+#define CFG_COMM_TRACE_FILE_TX_SUFFIX     ".tx"
+#define CFG_COMM_TRACE_FILE_RX_SUFFIX     ".rx"
+
 
 /**
  * Callback type for the shell comm-trace tap.
@@ -62,7 +69,8 @@ struct awecomm_trace
 {
     awe_config* cfg_p;
 
-    FILE*       comm_tx_fp;  // != NULL if file is open for dumping control data
+    FILE*       comm_tx_fp;  // != NULL if file is open for dumping TX control data
+    FILE*       comm_rx_fp;  // != NULL if file is open for dumping RX control data
     bool        do_trace; // whether to print trace output to console
 
     /* Optional comm tap - set via awecomm_trace_set_observer(), cleared by passing NULL. */
@@ -75,7 +83,7 @@ struct awecomm_trace
 int awecomm_trace_register_configs(awe_config* cfg_p);
 int awecomm_trace_init(struct awecomm_trace *trace_cfg_p, awe_config* cfg_p);
 int awecomm_trace_exit(struct awecomm_trace *trace_cfg_p);
-int awecomm_trace_dump(struct awecomm_trace *trace_cfg_p, int chn, const char *direction, FILE *fp, void* data, int data_sz_words);
+int awecomm_trace_dump(struct awecomm_trace *trace_cfg_p, int chn, const char *direction, void* data, int data_sz_words);
 int awecomm_trace_finalize(struct awecomm_trace *trace_cfg_p);
 
 /**

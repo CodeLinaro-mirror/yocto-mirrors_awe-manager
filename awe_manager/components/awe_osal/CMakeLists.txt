@@ -68,12 +68,16 @@ if(AWEMGR_BUILD_USE_GLIB)
     target_link_libraries(awosal_lib glib-2.0)
 endif()
 
-# temp disabled. should be enabled via CMake flag if lib is to be installed or not
-# install(TARGETS
-#     awosal_lib
-#     PUBLIC_HEADER
-#     RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
-# )
+if(AWEMGR_BUILD_SHELL OR AWEMGR_BUILD_TUNING_SERVER)
+# only install the library if it is needed by other components upstream;
+# we could also add (...AND NOT AWEMGR_BUILD_SINGLE_LIB) to avoid installing the library
+# if it is bundled into a single lib, but that would be a bit too much magic now
+install(TARGETS
+    awosal_lib
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+endif()
 
 if(AWEMGR_BUILD_TESTS AND AWE_OSAL_BUILD_TESTS)
 message(STATUS "AWOSAL: Building Tests")

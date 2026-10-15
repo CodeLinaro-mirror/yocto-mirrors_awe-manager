@@ -136,16 +136,34 @@ void awemgr_copy_usrdata(const awc_dict_element* src, awemgr_userdata* dst)
 }
 
 
+enum awemgr_rc awemgr_comm_rc_to_mgr_rc(int comm_rc)
+{
+    enum awemgr_rc rc;
+
+    switch (comm_rc)
+    {
+        case AWECOMM_RC_OK:
+            rc = awemgr_RC_OK;
+            break;
+        case AWECOMM_RC_TIMEOUT:
+            rc = awemgr_RC_COMM_TIMEOUT;
+            break;
+        case AWECOMM_RC_FAIL_COMM:
+            rc = awemgr_RC_COMM_FAIL;
+            break;
+        default:
+            rc = awemgr_RC_ERR;
+            break;
+    }
+    return rc;
+}
+
 enum awemgr_rc safe_transact(struct awecomm_data *comm_p, struct awecmd_st *buf_p, unsigned int *result_buffer_p, unsigned int result_buffer_size_in_words, unsigned int* rx_words_received_p)
 {
     int comm_rc = awecomm_transact_on_cmdbuf(comm_p, buf_p);
     if(comm_rc != AWECOMM_RC_OK)
     {
-        if(comm_rc == AWECOMM_RC_TIMEOUT)
-        {
-            return awemgr_RC_COMM_TIMEOUT;
-        }
-        return awemgr_RC_ERR;
+        return awemgr_comm_rc_to_mgr_rc(comm_rc);
     }
 
     int cmd_rc = awecmd_response_getData(buf_p, result_buffer_p, result_buffer_size_in_words, rx_words_received_p);
@@ -185,7 +203,7 @@ enum awemgr_rc get_awe_instance_ids(struct awemgr_data* mgr_p, unsigned int *nr_
 
     // the response is encoded into rx_buffer (1: nr of cores, 2++: instance nr )
     unsigned int rx_words_received;
-    enum awemgr_rc rc = safe_transact(mgr_p->comm_2_awe, buf_p, rx_buffer, sizeof(rx_buffer), &rx_words_received);
+    enum awemgr_rc rc = safe_transact(mgr_p->comm_2_awe, buf_p, rx_buffer, sizeof(rx_buffer) / sizeof(rx_buffer[0]), &rx_words_received);
 
     (void) awecomm_release_lock(mgr_p->comm_2_awe);
 

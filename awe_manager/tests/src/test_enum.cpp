@@ -183,6 +183,67 @@ TEST_F(AweMgrTestFixtureSetGetAWC, EnumerateDesigns) {
 
 /**
 ```yaml
+- id: itest~AWEMGR.GetDesignByName~1
+  covers: req~AWEMGR.DesignLookupByName~1
+  description: |
+    Checks that a design can be looked up by its name and that the information
+    returned is the same as the one returned for the design's index. An unknown
+    name is reported with awemgr_RC_ERR_DESIGN_NOTFOUND, so the call can be used
+    to check whether a design exists.
+```
+*/
+TEST_F(AweMgrTestFixtureSetGetAWC, GetDesignInfoByName) {
+
+	struct awemgr_ctx *awectx_p = awemgr_get_awc_context(m_mgr_p, 0);
+	ASSERT_TRUE(awectx_p != NULL);
+
+	int nr_designs = awemgr_get_design_count(awectx_p);
+	ASSERT_GT(nr_designs, 0);
+
+	// every design found by index must be found by its name as well, with equal content
+	for (int x=0; x<nr_designs; x++)
+	{
+		// fill both structures with a non-zero pattern first, so that a field left
+		// untouched by the API shows up as a difference instead of accidentally matching
+		struct awemgr_design_info by_index;
+		memset(&by_index, 0xA5, sizeof(by_index));
+		ASSERT_EQ(awemgr_get_design_info(awectx_p, x, &by_index), awemgr_RC_OK);
+
+		struct awemgr_design_info by_name;
+		memset(&by_name, 0x5A, sizeof(by_name));
+		EXPECT_EQ(awemgr_get_design_info_by_name(awectx_p, by_index.name, &by_name), awemgr_RC_OK)
+			<< "design not found by name: " << by_index.name;
+
+		EXPECT_STREQ(by_name.name, by_index.name);
+		EXPECT_EQ(by_name.coreid_objectid, by_index.coreid_objectid);
+		EXPECT_EQ(by_name.size, by_index.size);
+		EXPECT_EQ(by_name.plugin_count, by_index.plugin_count);
+
+		// the whole plugin array must be defined, also for a design without plugins,
+		// and must be identical no matter which of the two getters filled it.
+		// note: compared over the full array length, not with STREQ, because the
+		// poison pattern above leaves no string termination if the API does not fill it
+		for (unsigned int p = 0; p < AWEMGR_MAX_PLUGINS_PER_DESIGN; p++)
+		{
+			EXPECT_EQ(memcmp(by_name.plugins[p].name, by_index.plugins[p].name, AWEMGR_MAX_PLUGIN_NAME_LEN), 0)
+				<< "plugin name differs at index " << p << " for design " << by_index.name;
+			EXPECT_EQ(by_name.plugins[p].core, by_index.plugins[p].core)
+				<< "plugin core differs at index " << p << " for design " << by_index.name;
+		}
+	}
+
+	// an unknown name is reported as such, not as a generic error
+	struct awemgr_design_info info;
+	EXPECT_EQ(awemgr_get_design_info_by_name(awectx_p, "NoSuchDesign", &info), awemgr_RC_ERR_DESIGN_NOTFOUND);
+
+	// parameter checks, consistent with the index based getter
+	EXPECT_EQ(awemgr_get_design_info_by_name(NULL, "Main", &info), awemgr_RC_ERR);
+	EXPECT_EQ(awemgr_get_design_info_by_name(awectx_p, NULL, &info), awemgr_RC_ERR);
+	EXPECT_EQ(awemgr_get_design_info_by_name(awectx_p, "Main", NULL), awemgr_RC_ERR);
+}
+
+/**
+```yaml
 - id: itest~AWEMGR.PluginInfo~1
   covers: req~AWEMGR.DesignEnumeration~1
   description: |

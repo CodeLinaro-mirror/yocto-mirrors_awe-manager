@@ -2,6 +2,48 @@
 
 This is a brief summary of changes to the AWE Manager release package.
 
+## Version 1.1.0
+
+Released: 2026-10-05
+
+- **NEW**: AWEMgr-Shell: new command `repeat` executes another shell command repeatedly for a given time and reports how many executions were performed, e.g. `repeat -cmd "get_value -var Scaler1.gain" -sec 5`. The output of the repeated command is suppressed so that only the summary (`calls`, `calls_per_sec`) is printed; use `-verbose` to see it, and `-throttle <usec>` to insert a delay between two executions so that a soak run stays at a defined load.
+
+- **NEW**: AWEMgr-Shell: the `repeat` command accepts `-count <number>` to end a run after a fixed number of executions instead of after a time, e.g. `repeat -cmd "get_value -var Scaler1.gain" -count 1000`. This measures a known amount of work rather than a duration and keeps a check reproducible on machines of different speed. `-count` takes precedence over `-sec`, which is not used when a count is given.
+
+- **NEW**: [awemgr_get_design_info_by_name()](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_get_design_info_by_name) returns the information of a single design given its name, as the name based counterpart of [awemgr_get_design_info()](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_get_design_info). An application that knows the design name no longer has to iterate over all designs to find its metadata. The name is resolved as it is in `awemgr_load_design()`, and an unknown name returns `awemgr_RC_ERR_DESIGN_NOTFOUND`, so the call can also be used to check whether a design exists.
+
+- **CHG**: AWEMgr-Shell: with communication tracing enabled (`comm-trace -on`), the output of the `info` command is no longer interleaved with the trace blocks of the API calls it performs. The traces are printed as they happen, the command output follows as one contiguous block, so the response stays a parsable YAML document. Command handlers can request this behavior with the `IdbgOutputHold` scope guard.
+
+- **CHG**: Communication tracing to file now writes TX and RX traffic into separate files. The value of `mgr.comm.trace.file` is treated as a basename; the TX dump is written to `<basename>.tx` and the RX dump to `<basename>.rx`.
+
+- **CHG**: `MAX_AWE_CORES` is available in `awe_manager.h` and documents the number of cores/instances supported per endpoint.
+
+- **CHG**: [awemgr_load_design()](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_load_design) and [awemgr_unload_design()](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_unload_design) now return the new error code `awemgr_RC_ERR_DESIGN_NOTFOUND` when a design name cannot be resolved in the AWC data base. This provides a convenient way to check whether a specific design, e.g. the 'ProgressiveLoad' late-load part of an AWB, is to be sent to AWECore or not.
+
+- **CHG**: A failed communication with AWECore (connection not available or lost, send or receive error) is now reported with the new error code `awemgr_RC_COMM_FAIL` instead of the generic `awemgr_RC_ERR`. This lets a client tell a transport failure apart from a timeout (`awemgr_RC_COMM_TIMEOUT`), an AWECore error or an invalid argument, and apply its own recovery policy. It applies to all API functions communicating with AWECore, including [awemgr_transact()](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_transact) and [awemgr_events_process_next()](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_events_process_next). A malformed response or malformed event data (wrong magic word, truncated header or payload) is still reported as `awemgr_RC_ERR`. Clients that compare against `awemgr_RC_ERR` to detect a lost connection must check for `awemgr_RC_COMM_FAIL` now.
+
+- **CHG**: CM/CI change: The code coverage report no longer includes the third party sources bundled with the AWEMgr-Shell add-on (isocline), so the reported rate refers to AWE-Manager code only.
+
+- **FIX**: [awemgr_events_process_next()](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_events_process_next) now returns `awemgr_RC_ERR` when the buffer for a large event payload cannot be allocated. Previously this failure was reported as success.
+
+- **FIX**: AWEMgr-Shell: a script file that includes itself - directly or through a chain of other script files - no longer crashes the shell by exhausting the stack. Script files may be nested up to 8 levels; a deeper include is rejected with an error message. A `repeat` is no longer accepted inside another `repeat`, also when reached through a script, because the outer run would count the inner runs instead of the repeated command. Running a `repeat` from a script file is unaffected.
+
+- **FIX**: AWEMgr-Shell: `info -cpu`, `info -mem`, `info -classes` and `info -layout` no longer crash when no AWC has been loaded and no `-endpoint` was given on the command line. An error message is printed instead.
+
+- **FIX**: library libawosal_lib.a is included in the install target now. This is required for upstream consumers building one of the addons (AWEMgr-Shell Server or Tuning Server).
+
+- **FIX**: API functions taking an endpoint or core index now reject an index outside the supported range (`0` to `MAX_AWE_ENDPOINTS-1` respectively `0` to `MAX_AWE_CORES-1`) and return an error. Affected are [awemgr_get_cpu_info()](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_get_cpu_info), [awemgr_get_layout_info()](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_get_layout_info), [awemgr_get_heap_info()](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_get_heap_info) and [awemgr_get_modulelist_info()](/AweMgrHdrDocs/awe__manager_8h/#function-awemgr_get_modulelist_info). Previously such an index was encoded into the tuning message header, which corrupted the header - including its length field - and could crash the calling application.
+
+- **FIX**: The COMM component's fallback tuning buffer size (used when `mgr.comm.buffersize` is not set) now follows the connection-backend default instead of a hardcoded value, so CSHMEM builds fall back to the correct size.
+
+- **FIX**: Two response buffer sizes were passed in bytes instead of words. Internally, querying the AWE instances claimed a larger response buffer than available, which could overwrite memory behind it. In AWEMgr-Shell, `send_command` claimed a smaller one than available, so a response longer than 8 words was truncated and only partly printed.
+
+- **FIX**: Command handle initialization now reports an error when one of its buffers cannot be allocated, instead of continuing with an invalid buffer. A handle from a failed initialization holds no dangling pointer.
+
+- **FIX**: A value of `mgr.comm.buffersize` that is not a number, or that is too small to hold a tuning command (below 7 words), is now reported and the backend default is used instead. Such a value was accepted before and left no room for a payload, which could make a `set_value` of a larger variable loop forever.
+
+- **FIX**: MISRA concern: the helper macros in the public header `awe_cmd.h` now parenthesize their parameters and their whole expansion, so they are safe to use in a larger expression. No change in behavior for the existing call sites.
+
 ## Version 1.0.1
 
 Released: 2026-06-05

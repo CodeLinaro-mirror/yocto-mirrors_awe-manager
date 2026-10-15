@@ -149,7 +149,7 @@ int socket_evt_read(awe_evt_backend* bkend, uint32_t timeoutMs)
     {
         AWE_COMM_LOGE("Event communication error: Incorrect magic word received from communication buffer: 0x%x (seen) != 0x%x (wanted). Returning AWECOMM_RC_FAIL_PARAM",
                         magicWord, AWE_EVENT_MAGIC_WORD);
-        return AWE_EVT_RC_COMM_ERR;
+        return AWE_EVT_RC_PROTOCOL_ERR;
     }
 
     // 2. read Event header
@@ -161,7 +161,7 @@ int socket_evt_read(awe_evt_backend* bkend, uint32_t timeoutMs)
         AWE_COMM_LOGE("Event communication error: no eventHeader. Reseting connection");
         (void)si_close_connection(pData->socketHdl);
         pData->socketHdl = 0;
-        return AWE_EVT_RC_COMM_ERR;
+        return AWE_EVT_RC_PROTOCOL_ERR;   // a truncated event, reported as protocol error
     }
 
     // 3. Resize Event payload Buffer(if required)
@@ -188,7 +188,7 @@ int socket_evt_read(awe_evt_backend* bkend, uint32_t timeoutMs)
         AWE_COMM_LOGE("Event communication error: payload read failed. Reseting connection");
         (void)si_close_connection(pData->socketHdl);
         pData->socketHdl = 0;
-        return AWE_EVT_RC_COMM_ERR;
+        return AWE_EVT_RC_PROTOCOL_ERR;   // a truncated event, reported as protocol error
     }
 
     // log trace of event and of event data (if enabled)

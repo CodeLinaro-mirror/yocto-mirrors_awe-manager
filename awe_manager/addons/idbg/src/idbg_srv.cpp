@@ -106,9 +106,13 @@ int CIdbgSrv::runFile(char *filename_p)
     int retval = -1;
     if (fp)
     {
+        /* Save and restore instead of clearing: a script file may include
+         * further script files, and the including one still runs in script
+         * mode after the included one is done. */
+        const bool prev_script_mode = m_script_mode;
         m_script_mode = true;
         retval = runFromHandle(fp);
-        m_script_mode = false;
+        m_script_mode = prev_script_mode;
         fclose(fp);
     }
     return retval;

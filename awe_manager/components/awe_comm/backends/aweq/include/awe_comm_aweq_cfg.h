@@ -26,6 +26,14 @@
 
 #include "awe_config.h"
 
+/* Default tuning/communication packet buffer size in 32-bit words for the AWEQ backend.
+   This value comes from the BSP and shared memory configuration in that project.
+   Serves both as the registered default for CFG_COMM_BUFFER_SIZE and as the
+   runtime fallback (see awecomm_init) when the key cannot be read. The value
+   depends on the selected AWECore connection backend. */
+#define CFG_COMM_BUFFER_SIZE_DEFAULT    4096
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif

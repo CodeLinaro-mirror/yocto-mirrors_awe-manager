@@ -37,7 +37,7 @@
 /* definitions for sleep and usleep */
 #if defined(AWOSAL_WINDOWS)
 #include <windows.h>
-#define aweosal_usleep(x)       Sleep(x/1000)
+#define aweosal_usleep(x)       (x < 1000U) ? Sleep(1) : Sleep(x/1000U)
 #define aweosal_sleep(x)        Sleep(x*1000)
 #define aweosal_mssleep(x)      Sleep(x)
 #else

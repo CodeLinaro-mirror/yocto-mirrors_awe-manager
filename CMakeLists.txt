@@ -121,7 +121,7 @@ endif()
 
 if(AWEMGR_BUILD_SHARED_LIB)
     if(AWEMGR_BUILD_SINGLE_LIB)
-        message(FATAL_ERROR "Single big static library as shared lib is (yet) supported")
+        message(FATAL_ERROR "Single big static library as shared lib is not (yet) supported")
     endif()
     add_definitions (-fPIC)
     set(AWEMGR_BUILD_TYPE SHARED)

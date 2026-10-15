@@ -78,6 +78,13 @@ typedef struct app_ctx_
     // the shell server instance
     CIdbgSrv           *idbg_srv_p{nullptr};
 
+    // Nesting depth of the commands which dispatch further command lines on the
+    // same idbg handle, i.e. "repeat" and "script". Both can end up invoking
+    // themselves, which is either useless or fatal, so each of them counts its
+    // active invocations here and refuses to go deeper (see CmdNestingGuard).
+    int                 repeat_nesting{0};
+    int                 script_nesting{0};
+
 } app_ctx;
 
 #define DEF_VAR_MGR_DATA(p)  app_ctx *appCtx_p = (app_ctx *) idbg_get_userdata(p);

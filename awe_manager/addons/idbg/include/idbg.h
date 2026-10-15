@@ -50,6 +50,67 @@ int idbg_parse_cmd (idbg_t *this_p, unsigned char *cmdbuf_p, int cmdbuf_sz);
 
 int idbg_print     (idbg_t *this_p, const char *fmt, ...);
 
+/**
+ * Print bypassing an active idbg_output_hold(), i.e. always straight to the
+ * real output sink (stdout, socket, ...).
+ *
+ * Use this for asynchronous output that is produced *while* a command is
+ * running and that must not be folded into the command's own output block -
+ * for example the comm-trace tap of the AWEMgr-Shell, which is called from
+ * inside the AWE Manager API calls a command performs.
+ *
+ * Without a hold in place this behaves exactly like idbg_print().
+ */
+int idbg_print_direct (idbg_t *this_p, const char *fmt, ...);
+
+/**
+ * Start collecting idbg_print() output in an internal buffer instead of
+ * writing it to the output sink.
+ *
+ * A command uses this to keep its output contiguous even when unrelated
+ * output (comm traces) is emitted from within the API calls it makes.
+ * Every call must be paired with idbg_output_flush(); calls nest, only the
+ * outermost flush emits the collected output.
+ *
+ * Note: the buffer is per idbg handle and not protected against concurrent
+ * access. Only the thread executing the command may hold/flush output; other
+ * threads shall use idbg_print_direct().
+ *
+ * @return 0 on success
+ */
+int idbg_output_hold  (idbg_t *this_p);
+
+/**
+ * Counterpart of idbg_output_hold(). The outermost flush restores the output
+ * sink and writes the collected output to it, without anything else being
+ * able to appear in between. Output sinks format into fixed size buffers, so
+ * the collected block is handed over in chunks that fit into them.
+ *
+ * @return 0 on success, -1 when no hold is active
+ */
+int idbg_output_flush (idbg_t *this_p);
+
+/**
+ * Drop all idbg_print() output instead of writing it to the output sink.
+ *
+ * A command uses this while it executes something whose output would flood
+ * the console or socket, e.g. the command repeated by "repeat".
+ * Every call must be paired with idbg_output_enable(); calls nest, only the
+ * outermost enable puts the output sink back in place.
+ *
+ * @return 0 on success
+ */
+int idbg_output_disable(idbg_t *this_p);
+
+/**
+ * Counterpart of idbg_output_disable(). The outermost enable re-installs the
+ * output sink - stdout or socket - that was in use when the output was
+ * dropped, together with its backend.
+ *
+ * @return 0 on success, -1 when the output is not dropped
+ */
+int idbg_output_enable (idbg_t *this_p);
+
 char ** idbg_get_cmdlist  (idbg_t *this_p);
 char ** idbg_get_dirlist  (idbg_t *this_p);
 char * idbg_get_dirpath (idbg_t *this_p);
@@ -68,6 +129,18 @@ void *idbg_get_userdata (idbg_t *this_p);
 void  idbg_set_printfct (idbg_t *this_p, idbglib_print_func *fct_p, void* backend_p);
 void  idbg_reset_printfct (idbg_t *this_p);
 void* idbg_get_printfct_backend(idbg_t *this_p);
+
+/**
+ * Get the output sink currently installed on the handle.
+ *
+ * Counterpart of idbg_set_printfct(): while output is held, the real sink is
+ * returned, i.e. the one a matching idbg_set_printfct() call would replace.
+ * Together with idbg_get_printfct_backend() this allows a command to install
+ * a temporary sink - e.g. to suppress the output of the commands it invokes,
+ * see the "repeat" command of the AWEMgr-Shell - and to restore the previous
+ * one afterwards, no matter whether output goes to stdout or to a socket.
+ */
+idbglib_print_func *idbg_get_printfct (idbg_t *this_p);
 
 // creating entries dynamically
 int idbg_allocate_dir(idbg_t *this_p, const char *dirname_p, int nr_entries, idbgtableentry_t **newtbl_pp);

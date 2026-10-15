@@ -27,12 +27,9 @@
 #include "awe_config.h"
 
 #define CFG_COMM_BUFFER_SIZE            "mgr.comm.buffersize"
-#ifdef AWEMGR_AWECORE_CONNECTION_SOCKET
-    #define DEFAULT_TUNEMSG_SIZE_IN_WORDS   "264"
-#endif
-#ifdef AWEMGR_AWECORE_CONNECTION_CSHMEM
-    #define DEFAULT_TUNEMSG_SIZE_IN_WORDS   "4096"
-#endif
+// note: the default value is backend-specific and defined in the backend-specific cfg.h file,
+//       e.g. awe_comm_socket_cfg.h or awe_comm_aweq_cfg.h
+
 
 #define CFG_COMM_TIMEOUT         "mgr.comm.timeoutms"
 #define DEFAULT_COMM_TIMEOUT     "2000"

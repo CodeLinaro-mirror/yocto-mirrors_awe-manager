@@ -41,6 +41,17 @@
 #include "awe_comm_logging.h"
 #include "awe_config.h"
 
+/* String form of the default, used when registering the config item. */
+#define AWECOMM_STRINGIFY_(x)   #x
+#define AWECOMM_STRINGIFY(x)    AWECOMM_STRINGIFY_(x)
+#define DEFAULT_TUNEMSG_SIZE_IN_WORDS   AWECOMM_STRINGIFY(CFG_COMM_BUFFER_SIZE_DEFAULT)
+
+/* Smallest tuning buffer size that still allows a command to be built: the
+   callers subtract up to 6 words of overhead (header, handle, offset, count,
+   CRC, ...) from the buffer size to obtain the usable payload size, so anything
+   below 7 words leaves no room for payload and underflows that computation. */
+#define MIN_TUNEMSG_SIZE_IN_WORDS       7U
+
 
 /* ****************************************************************************
  * TYPE DEFINITIONS (NON PUBLIC) - POSSIBLY BACKEND SPECIFIC
@@ -128,8 +139,29 @@ int awecomm_init(awe_config* cfg_p, aweevt_listener cb, void *userdata_p, struct
         return AWECOMM_RC_FAIL_RESOURCES;
     }
 
-    uint32_t tuningBufferSize = 264;
-    aweconfig_get_as_uint(cfg_p, CFG_COMM_BUFFER_SIZE, &tuningBufferSize);
+    /* The value sizes the request and the response buffer of every channel, so a
+       value that is too small breaks every caller computing a payload size from
+       it. A value that is too large is not rejected here; awecmd_init below
+       reports the allocation failure. */
+    uint32_t tuningBufferSize = CFG_COMM_BUFFER_SIZE_DEFAULT;
+    int cfg_rc = aweconfig_get_as_uint(cfg_p, CFG_COMM_BUFFER_SIZE, &tuningBufferSize);
+    if (cfg_rc != AWECFG_RC_OK)
+    {
+        AWE_COMM_LOGW("Configuration %s is not set or not a number, using %u words",
+            CFG_COMM_BUFFER_SIZE, (uint32_t) CFG_COMM_BUFFER_SIZE_DEFAULT);
+        tuningBufferSize = CFG_COMM_BUFFER_SIZE_DEFAULT;
+    }
+    else if (tuningBufferSize < MIN_TUNEMSG_SIZE_IN_WORDS)
+    {
+        AWE_COMM_LOGE("Configuration %s = %u is below the minimum of %u words, using %u words instead",
+            CFG_COMM_BUFFER_SIZE, tuningBufferSize, MIN_TUNEMSG_SIZE_IN_WORDS,
+            (uint32_t) CFG_COMM_BUFFER_SIZE_DEFAULT);
+        tuningBufferSize = CFG_COMM_BUFFER_SIZE_DEFAULT;
+    }
+    else
+    {
+        // configured value is usable as it is
+    }
 
     AWE_COMM_LOGI("Tuning Buffer size = %u words", tuningBufferSize);
     for (int i=0; i<MAX_AWECOMM_CHANNELS; i++)
@@ -242,7 +274,7 @@ int awecomm_transact_explicit(struct awecomm_data *ctrl_p, void* data, int data_
     }
 
     // dump data content to logging if tracing enabled
-    awecomm_trace_dump(&ctrl_p->trace_cfg, chn, "TX", NULL, data, data_sz);
+    awecomm_trace_dump(&ctrl_p->trace_cfg, chn, "TX", data, data_sz);
 
     // ************************************************************************
     // wait for response from channel buffer
@@ -257,7 +289,7 @@ int awecomm_transact_explicit(struct awecomm_data *ctrl_p, void* data, int data_
     }
 
     // dump data content to logger if enabled
-    awecomm_trace_dump(&ctrl_p->trace_cfg, 0, "RX", NULL, response, nr_words_read);
+    awecomm_trace_dump(&ctrl_p->trace_cfg, 0, "RX", response, nr_words_read);
 
     return AWECOMM_RC_OK;
 }

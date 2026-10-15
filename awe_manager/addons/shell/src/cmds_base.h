@@ -76,4 +76,7 @@ int script(IDBG_PARAMS);
 /** enable/disable time commands */
 int sys_time_commands(IDBG_PARAMS);
 
+/** repeatedly executes another shell command for a given time and reports the number of executions */
+int repeat_command(IDBG_PARAMS);
+
 #endif //INCLUSION_GUARD_CMDS_BASE_H

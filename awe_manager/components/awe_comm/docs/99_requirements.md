@@ -11,6 +11,15 @@ These are the requirements specific to the communication handling component.
     The module needs an initialization routine which has to be called on "both sides"
     prior to exchange (control) information.
 
+- id: dsn~AWEMGR.ControlComm.TuningBufferSizeValidation~1
+  needs: itest
+  description: |
+    The configured tuning buffer size sizes the request and the response buffer of
+    every channel, and its consumers derive a usable payload size from it by
+    subtracting the command overhead. Initialization shall therefore reject a
+    configured value that is not a number or that is too small to hold a command
+    besides that overhead, report it, and use the backend default instead.
+
 - id: dsn~AWEMGR.ControlComm.Role~1
   # needs: itest
   description: |
@@ -69,6 +78,13 @@ These are the requirements specific to the communication handling component.
   needs: itest
   description: |
     The component must yield methods to provide a dump/trace of the data handled on the communication.
+
+- id: dsn~AWEMGR.ControlComm.TracingSplitFiles~1
+  needs: itest
+  description: |
+    When dumping the traced communication data to file, the configured file name shall be
+    treated as a basename and the TX and RX traffic shall be written into separate files.
+    The TX dump is written to '<basename>.tx' and the RX dump to '<basename>.rx'.
 
 
 ```

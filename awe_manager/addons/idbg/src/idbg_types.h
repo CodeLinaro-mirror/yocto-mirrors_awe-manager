@@ -28,8 +28,9 @@
 #include "idbg.h"
 #include "idbg_cmdargs.h"
 
+#include <string>
+
 // #include <unordered_map>
-// #include <string>
 
 typedef int Bool;
 
@@ -63,6 +64,17 @@ struct idbg_st {
 
   idbglib_print_func *print_fct_p;
   void               *print_fd_p;
+
+  // deferred output, see idbg_output_hold() / idbg_output_flush()
+  idbglib_print_func *held_fct_p;  /**< real sink, saved while output is held */
+  int                 hold_depth;  /**< nesting level of idbg_output_hold() */
+  std::string         capture;     /**< collected output while hold_depth > 0 */
+
+  // ignored output, see idbg_output_disable() / idbg_output_enable()
+  idbglib_print_func *saved_fct_p;      /**< real sink, saved while output is dropped */
+  void               *saved_backend_p;  /**< backend of the saved sink */
+  int                 drop_depth;       /**< nesting level of idbg_output_disable() */
+
 };
 
 

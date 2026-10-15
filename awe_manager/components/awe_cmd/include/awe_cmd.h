@@ -68,22 +68,22 @@ struct awecmd_st
 };
 
 /** helper macro to obtain the size of request buffer in nr of words */
-#define AWECMD_REQUESTBUFFER_SZ(ctx_p)  ctx_p->wraparound_p - ctx_p->buffer_p
+#define AWECMD_REQUESTBUFFER_SZ(ctx_p)  ((ctx_p)->wraparound_p - (ctx_p)->buffer_p)
 
 /** helper macro to return the response buffer size in nr of words */
-#define AWECMD_RESPONSEBUFFER_SZ(ctx_p) ctx_p->response_buffer_size
+#define AWECMD_RESPONSEBUFFER_SZ(ctx_p) ((ctx_p)->response_buffer_size)
 
 /** helper macro for calculating the coreid out of a control handle */
-#define AWE_COREID_FROM_HANDLE(handle)   ((handle & 0x780) >> 7)
+#define AWE_COREID_FROM_HANDLE(handle)   (((handle) & 0x780) >> 7)
 
 /** helper macro for calculating the coreid out of a tunnel Address */
-#define AWE_COREID_FROM_TUNNELADDR(tunnelAddr) ((tunnelAddr >> 16)&0xff)
+#define AWE_COREID_FROM_TUNNELADDR(tunnelAddr) (((tunnelAddr) >> 16) & 0xff)
 
 /** helper macro to obtain message total size */
-#define AWECMD_MSG_TOTAL_LENGTH(buf_p)   ((*((UINT32*)buf_p) >> 16) & 0xffff)
+#define AWECMD_MSG_TOTAL_LENGTH(buf_p)   ((*((UINT32*)(buf_p)) >> 16) & 0xffff)
 
 /** get size of message without CRC value */
-#define AWECMD_MSG_NO_CRC_LENGTH(buf_p)   AWECMD_MSG_TOTAL_LENGTH(buf_p) - 1
+#define AWECMD_MSG_NO_CRC_LENGTH(buf_p)   (AWECMD_MSG_TOTAL_LENGTH(buf_p) - 1)
 
 /** type of a AWE event listener function; this method is called when an asynchronous
  * event has been received.
@@ -101,8 +101,8 @@ typedef int (*aweevt_listener)(const aweevent_header* hdr, const char* payload, 
 // helper macros to extract from our "coreid-objectid" tunnel address
 // the tunnel address is a 32bit value, where the first 16 bits are the core ID and the last 16 bits are the object ID
 // actually this should not belong to awe_CMD, it is rather a "protocol" on top of it
-#define AWECMD_COREID_FROM_TUNNELADDRESS(tunnel_address)  ((tunnel_address >> 16) & 0xFF)
-#define AWECMD_OBJECTID_FROM_TUNNELADDRESS(tunnel_address)  (tunnel_address & 0xffff)
+#define AWECMD_COREID_FROM_TUNNELADDRESS(tunnel_address)  (((tunnel_address) >> 16) & 0xFF)
+#define AWECMD_OBJECTID_FROM_TUNNELADDRESS(tunnel_address)  ((tunnel_address) & 0xffff)
 
 /**
  * allocate a buffer for receiving the binary command data packages, and adjust pointers
